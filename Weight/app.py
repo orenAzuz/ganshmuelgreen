@@ -13,7 +13,7 @@ def weight():
     return "OK"
 
 @app.route('/batch-weight')
-def batch-weight():
+def batch_weight():
     return "OK"
 
 @app.route('/unknown')
