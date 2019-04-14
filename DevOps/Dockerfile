@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt --src /usr/local/src
 COPY templates/index.html templates/
 COPY app.py .
-RUN chmod 644 app.py
+RUN chmod 775 app.py
 EXPOSE 8000
 
 ENTRYPOINT [ "python3" , "app.py" ]
