@@ -7,7 +7,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
-      - db-data:/var/lib/mysql
+      - db_data:/var/lib/mysql
+      - ${DB_SCRIPT_PATH}:/db_scripts
     # all ports available via shared network
     networks:
       - shared
@@ -33,20 +34,20 @@ volumes:
   app_data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      # set based on your environment - absolute path
-      #device: "${APP_DATA_PATH}"
-      device: '/home/system/devops/w3/ganshmuelgreen/Weight/app/in' 
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${APP_DATA_PATH}"
+      #device: '/home/system/devops/w3/ganshmuelgreen/Weight/app/in' 
 
-  db-data:
+  db_data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      # set based on your environment - absolute path
-      #device: "${DB_DATA_PATH}"
-      device: '/home/system/devops/w3/ganshmuelgreen/Weight/mysql/datadir'
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${DB_DATA_PATH}"
+      #device: '/home/system/devops/w3/ganshmuelgreen/Weight/mysql/datadir'
 
 networks:
   shared:
