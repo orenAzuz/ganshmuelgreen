@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import flask
 from flask import Flask
 
 app = Flask(__name__)
@@ -7,47 +7,47 @@ app = Flask(__name__)
 
 @app.route('/health')
 def health():
-    return "OK"
+    return "Payment team is OK"
 
 
 @app.route('/provider', methods=['POST'])
 def createProvider():
-    return "OK"
+    return "Create provider"
 
 
 @app.route('/provider/<id>', methods=['PUT'])
 def updateProvider(id):
-    return "OK"
+    return "Update provider name by id:" + str(id)
 
 
 @app.route('/rates', methods=['GET', 'POST'])
 def rates():
-    return "OK"
+    if flask.request.method == 'POST':
+        return "Post rates"
+    else:
+        return "Get rates"
 
 
 @app.route('/truck', methods=['POST'])
 def createTruck():
-    return "OK"
+    return "Create Truck"
 
 
 @app.route('/truck/<id>', methods=['PUT'])
 def updateTruck(id):
-    return "OK"
+    return "Update Truck provider by license: " + str(id)
 
 
-@app.route('/truck/<id>?from=<t1>&to=<t2>')
-def getTruck(id, t1, t2):
-    return "OK"
+#@app.route('/truck/<id>/<t1>/<t2>', methods=['GET'])
+#def getTruck(id, t1, t2):
+#    return "Get truck by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
 
 
-@app.route('/item/<id>')
-def item():
-    return "OK"
-
-
-@app.route('/session/<id>')
-def session():
-    return "OK"
+#@app.route('/bill/<id>', methods=['GET'])
+#def bill(id):
+#    t1=flask.request.get("from")
+   # t2=flask.request.args("to")
+    #return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
 
 
 if __name__ == "__main__":
