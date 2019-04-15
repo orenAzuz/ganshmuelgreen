@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   `containers` varchar(10000) DEFAULT NULL,
   `bruto` int(12) DEFAULT NULL,
   `truckTara` int(12) DEFAULT NULL,
+  --   "neto": <int> or "na" // na if some of containers unknown
   `neto` int(12) DEFAULT NULL,
   `produce` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)

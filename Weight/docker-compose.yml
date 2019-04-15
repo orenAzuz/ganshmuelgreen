@@ -4,6 +4,9 @@ services:
   mysql-db:
     container_name: mysql-c
     image: mysql
+    # ports used for development
+    ports:
+      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
