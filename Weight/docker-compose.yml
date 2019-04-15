@@ -1,0 +1,54 @@
+version: '3'
+services:
+
+  mysql-db:
+    container_name: mysql-c
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: greengo
+    volumes:
+      - db_data:/var/lib/mysql
+      - ${DB_SCRIPT_PATH}:/db_scripts
+    # all ports available via shared network
+    networks:
+      - shared
+
+  weigh-app:
+    container_name: weigh-app-c
+    image: weigh-app
+    ports:
+      - "8081:8000"
+    build: 
+      context: ./app
+      dockerfile: Dockerfile  
+    networks:
+      - shared
+    volumes:
+      - app_data:/in
+    entrypoint: 
+      - python3 
+      - app.py
+
+
+volumes:
+  app_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${APP_DATA_PATH}"
+      #device: '/home/system/devops/w3/ganshmuelgreen/Weight/app/in' 
+
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${DB_DATA_PATH}"
+      #device: '/home/system/devops/w3/ganshmuelgreen/Weight/mysql/datadir'
+
+networks:
+  shared:
+    driver: bridge
