@@ -12,6 +12,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ${DB_SCRIPT_PATH}:/db_scripts
+      # this directory is used to automatically load all scripts found in there 
+      - ${DB_AUTO_RUN_SCRIPTS}:/docker-entrypoint-initdb.d
     # all ports available via shared network
     networks:
       - shared
