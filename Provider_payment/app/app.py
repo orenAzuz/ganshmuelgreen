@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import flask
 from flask import Flask
-
+import urllib
+import json 
 app = Flask(__name__)
 
 
@@ -14,9 +15,18 @@ def health():
 
 @app.route('/provider/<name>', methods=['POST'])
 def createProvider(name):
-    query = "INSERT INTO Provider (`name`) VALUES ('" + name + "');"
-    runInsertQuery(query)
-    return "Create provider: " + name
+    runInsertQuery("INSERT INTO Provider (`name`) VALUES ('" + name + "');")
+    #query = "SELECT * FROM Provider WHERE Provider.name IN name;"
+    #cur.execute(query, 'Provider')
+    #result = cur.fetchall()
+    #for row in result:
+    #return "Create provider: " + name
+    data = {}
+    id=9999
+    data = {
+     id: name, 
+    }
+    return str(data)
 
 
 @app.route('/provider/<id>/<name>', methods=['PUT'])
@@ -52,7 +62,9 @@ def updateTruck(id, provider_id):
 def getTruck(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
-    return "Get Truck by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
+    weightUrl = "http://0.0.0.0:8081/item/" + str(id)
+    response = urllib.request.urlopen(weightUrl)
+    return response.read()
 
 
 @app.route('/bill/<id>', methods=['GET'])
@@ -60,6 +72,23 @@ def bill(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
     return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
+    data = {
+    "id": "",
+    "name": "",
+    "from": "",
+    "to": "",
+    "truckCount": "",
+    "sessionCount": "",
+    "products": [
+      { "product":"",
+        "count": "", 
+        "amount": "", 
+        "rate": "", 
+        "pay": "" 
+      },...
+    ],
+    "total": "" 
+}
 
 
 
@@ -87,4 +116,4 @@ def createJsonResponse():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
