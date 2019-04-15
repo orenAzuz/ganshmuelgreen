@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `containers_registered` (
 
 CREATE TABLE IF NOT EXISTS `transactions` (
   `id` int(12) NOT NULL AUTO_INCREMENT,
-  `datetime` varchar(14) DEFAULT NULL,
+  `datetime` datetime DEFAULT NULL,
   `direction` varchar(10) DEFAULT NULL,
   `truck` varchar(50) DEFAULT NULL,
   `containers` varchar(10000) DEFAULT NULL,
