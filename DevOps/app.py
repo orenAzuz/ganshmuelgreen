@@ -20,7 +20,7 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
-	print('request.get_data : request.get_data')
+	print('request.get_data : ',request.get_data)
 	print('request.query_string : ',request.query_string)
 	subprocess.call(['./reload.sh'])
 	mestxt = "RELOAD OK"
