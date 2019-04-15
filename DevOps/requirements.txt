@@ -1,3 +1,2 @@
 flask
 flask_mail
-from flask_mail import Mail, Message
