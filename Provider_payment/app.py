@@ -38,16 +38,18 @@ def updateTruck(id):
     return "Update Truck provider by license: " + str(id)
 
 
-#@app.route('/truck/<id>/<t1>/<t2>', methods=['GET'])
-#def getTruck(id, t1, t2):
-#    return "Get truck by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
+@app.route('/truck/<id>', methods=['GET'])
+def getTruck(id):
+    t1 = flask.request.args.get("from")
+    t2 = flask.request.args.get("to")
+    return "Get Truck by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
 
 
-#@app.route('/bill/<id>', methods=['GET'])
-#def bill(id):
-#    t1=flask.request.get("from")
-   # t2=flask.request.args("to")
-    #return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
+@app.route('/bill/<id>', methods=['GET'])
+def bill(id):
+    t1 = flask.request.args.get("from")
+    t2 = flask.request.args.get("to")
+    return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
 
 
 if __name__ == "__main__":
