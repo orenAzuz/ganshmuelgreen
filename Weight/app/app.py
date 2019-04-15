@@ -55,9 +55,17 @@ def item(id):
     return str(data)
 
 @app.route('/session/<id>')
-def session():
-    mydb.close()
-    return "OK"
+def session(id):
+    result="""
+    { "id": "mario", 
+    "truck": 11238,
+    "bruto": 9999,
+    "produce":"tomato",
+    "truckTara": 654,
+    "neto": 64564
+    }
+    """
+    return result
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=8000,debug=True)

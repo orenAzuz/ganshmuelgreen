@@ -14,7 +14,7 @@ USE weight;
 
 
 CREATE TABLE IF NOT EXISTS `containers_registered` (
-  `container_id` int(12) NOT NULL AUTO_INCREMENT,
+  `container_id` varchar(15) NOT NULL,
   `weight` int(12) DEFAULT NULL,
   `unit` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`container_id`)
