@@ -31,7 +31,7 @@ def api_root():
 
 @app.route("/health")
 def api_health():
-	mestxt = "HEALTH OK: new deploy from git. branch -> master. "
+	mestxt = "HEALTH OK"
 	return render_template('index.html',message=mestxt)
 
 @app.route("/reload",methods=['POST'])
@@ -39,7 +39,7 @@ def api_reload():
 	print('request.get_data : ',request.get_data)
 	print('request.query_string : ',request.query_string)
 	subprocess.call(['./reload.sh'])
-	mestxt = "RELOAD OK"
+	mestxt = "RELOAD OK: new deploy from git. branch -> master. "
 	send_mail(mestxt)
 	return render_template('index.html',message=mestxt)
 
@@ -57,7 +57,7 @@ def send_mail(message):
 																		'emanaz.91@gmail.com',
 																		'sharontabakman@gmail.com',
 																		'stacnospam@gmail.com'])
-	msg.body = 'This is a test email'  # Customize based on user input
+	msg.body = 'The status is ok:200'  # Customize based on user input
 	mail.send(msg)
 
 	return 'done'
