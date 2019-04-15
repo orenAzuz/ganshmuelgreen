@@ -4,6 +4,8 @@ services:
   mysql-db:
     container_name: billdb
     image: mysql
+    ports:
+          - ${DB_EXT_PORT}:${DB_INT_PORT}
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:

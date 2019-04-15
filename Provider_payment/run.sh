@@ -1,4 +1,4 @@
 #!/bin/bash
 source ./set-env.sh
 
-docker-compose up
+docker-compose build && docker-compose up
