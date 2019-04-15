@@ -47,20 +47,24 @@ def api_reload():
 # @app.route("/mail", methods=['GET'])
 def send_mail(message):
 
-	msg = Message(message, sender='webmykitchen@gmail.com', recipients=['orezaz@gmail.com',
-																	   'yaniv.d@develeap.com',
-																	   'nirdod@gmail.com',
-																	   'giuliovnturi@gmail.com'
-																	   'ilana.fisher.il@gmail.com',
-																	   'razleshem3@gmail.com',
-																	   'br.cohen@hotmail.fr',
-																		'emanaz.91@gmail.com',
-																		'sharontabakman@gmail.com',
-																		'stacnospam@gmail.com'])
+	msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
 	msg.body = 'The status is ok:200'  # Customize based on user input
 	mail.send(msg)
 
 	return 'done'
+
+
+def get_mail_list():
+	return ['orezaz@gmail.com',
+		    'yaniv.d@develeap.com',
+			'nirdod@gmail.com',
+			'giuliovnturi@gmail.com'
+			'ilana.fisher.il@gmail.com',
+			'razleshem3@gmail.com',
+			'br.cohen@hotmail.fr',
+			'emanaz.91@gmail.com',
+			'sharontabakman@gmail.com',
+			'stacnospam@gmail.com']
 
 
 if __name__ == "__main__":
