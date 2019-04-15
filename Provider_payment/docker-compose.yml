@@ -13,7 +13,7 @@ services:
     networks:
       - shared
 
-  weigh-app:
+  bill-app:
     container_name: billsrv
     image: billsrvimg
     ports:
@@ -38,7 +38,6 @@ volumes:
       o: bind
       # set based on your environment
       device: "${APP_DATA_PATH}"
-      #device: '/home/system/devops/w3/ganshmuelgreen/Weight/app/in' 
 
   db_data:
     driver: local
@@ -47,7 +46,6 @@ volumes:
       o: bind
       # set based on your environment
       device: "${DB_DATA_PATH}"
-      #device: '/home/system/devops/w3/ganshmuelgreen/Weight/mysql/datadir'
 
 networks:
   shared:
