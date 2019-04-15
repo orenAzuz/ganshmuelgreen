@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt --src /usr/local/src
-#RUN pip3 install flask
+RUN pip3 install flask_mail
 
 COPY templates/index.html templates/
 COPY app.py .
