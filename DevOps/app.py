@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from flask import Flask, render_template, request, json
+from flask_mail import Mail, Message
 import subprocess
 
 #PORT = 8000
@@ -12,7 +13,6 @@ def api_root():
 	mestxt = "ROOT OK"
 	return render_template('index.html',message=mestxt)
 
-
 @app.route("/health")
 def api_health():
 	mestxt = "HEALTH OK"
@@ -20,6 +20,9 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
+	data=request.get_data
+	print("request.get_data :",request.get_data)
+	print("rrequest.query_string :",request.query_string)
 	subprocess.call(['./reload.sh'])
 	mestxt = "RELOAD OK"
 	return render_template('index.html',message=mestxt)

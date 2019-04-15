@@ -1,21 +1,24 @@
 #FROM python:3.6-slim
-FROM python:3.7-alpine
+#FROM python:3.7-alpine
+FROM tiangolo/uwsgi-nginx:python3.6-alpine3.7
 
-#RUN mkdir -p /app/templates
-#WORKDIR /app
+ENV PYTHONPATH=/app
 
-#COPY requirements.txt .
-#RUN pip3 install -r requirements.txt --src /usr/local/src
-RUN pip3 install flask
+RUN mkdir -p /app/templates
+WORKDIR /app
 
-RUN mkdir templates
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt --src /usr/local/src
+
 COPY templates/index.html templates/
 COPY app.py .
-#RUN chmod 775 app.py
+COPY reload.sh .
 
-#EXPOSE 8000
+RUN chmod +x app.py
+RUN chmod +x reload.sh
 
-#ENTRYPOINT ["python3" ]
+EXPOSE 5000
+
 CMD python3 app.py
 
 #docker build -t devops .
