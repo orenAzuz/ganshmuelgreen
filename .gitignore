@@ -2,3 +2,4 @@
 Provider_payment/.idea/
 Green.iml
 removeCont.sh
+Provider_payment/ set-env.sh
