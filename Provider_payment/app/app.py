@@ -5,7 +5,11 @@ import pymysql.cursors
 from flask import Flask
 import urllib
 import json 
+
 app = Flask(__name__)
+
+# CONSTS
+HOST = "0.0.0.0"
 
 
 @app.route('/health')
@@ -17,15 +21,17 @@ def health():
 
 @app.route('/provider/<name>', methods=['POST'])
 def createProvider(name):
+    connection = getConnection()
     query = "INSERT INTO Provider (`name`) VALUES ('" + name + "');"
-    runQuery(query)
-    id=9999
-    #TODO get id from DB
-    data = {
-     id: name, 
-    }
-    return str(data)
-
+    try:
+    	with connection.cursor() as cursor:
+        	cursor.execute(query)
+        	providerID = cursor.lastrowid
+        connection.commit()
+	finally:
+		connection.close()
+    return json.dumps({str(providerID): name})
+	
 
 @app.route('/provider/<id>/<name>', methods=['PUT'])
 def updateProvider(id, name):
@@ -79,12 +85,12 @@ def bill(id):
     "truckCount": "",
     "sessionCount": "",
     "products": [
-      { "product":"",
+            {"product": "",
         "count": "", 
         "amount": "", 
         "rate": "", 
         "pay": "" 
-      },...
+             }, ...
     ],
     "total": "" 
 }
@@ -103,9 +109,12 @@ def checkDBConnection():
         db.close() 
     return 1
 
-
+def getConnection():
+    return pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
+                           cursorclass=pymysql.cursors.DictCursor)
 def runQuery(query):
-    connection = pymysql.connect(host="mysql-db",port=3306,user="root",passwd="greengo",db="billdb", charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+    # Connect to the database
+    connection = getConnection()
 
     try:
         with connection.cursor() as cursor:
@@ -123,7 +132,6 @@ def getRateFile():
 def createJsonResponse():
     return ""
     pass
-
 
 
 if __name__ == "__main__":
