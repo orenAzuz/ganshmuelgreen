@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask,request
+from flask import Flask, request, abort
 import mysql.connector, time
 import json
 from __future__ import print_function
@@ -10,7 +10,8 @@ import os
 import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask
-#from flask_api import status
+import datetime
+from flask_api import status
 
 app = Flask(__name__)
 
@@ -43,9 +44,7 @@ def health():
     except:
         return 'Failure', 500
 
-@app.route('/weight',methods = ['GET'])
-@app.route('/weight')
-@app.route('/weight', methods=['POST'])
+@app.route('/weight', methods=['GET', 'POST'])
 def weight():
     mydb = mysql.connector.connect(
       host="mysql-db",
@@ -70,10 +69,6 @@ def weight():
         json_data.append(content)
         content = {}
     return json.dumps(json_data)
-    return "OK"
-    ## code ...
-    # mydb.close()
-    return "OK"
 
 @app.route('/batch-weight/<file>')
 def batch_weight(file):
@@ -150,44 +145,68 @@ def unknown():
         return "There is none UNKNOWN weight"
     else:
         return ret
-    return "OK"
-    ## code ...
-    # mydb.close()
-    return "OK"
 
-@app.route('/item/<id>', methods=['GET'])
-def item(id):
-    t1 = flask.request.args.get("from")
-    if str(t1) == "None":
-        t1="000000"
-    t2 = flask.request.args.get("to")
-    if str(t2) == "None":
-        t2="Now"
+
+@app.route('/item/<idarg>', methods=['GET'])
+def item(idarg):
+
     mydb = mysql.connector.connect(
-        host=os.environ['DB_HOST'],
-        user="root",
-        passwd="greengo",
-        database="weight",
-        auth_plugin='mysql_native_password'
+      host=os.environ['DB_HOST'],
+      user="root",
+      passwd="greengo",
+      database="weight",
+      auth_plugin='mysql_native_password'
     )
+
+
+    now = datetime.datetime.now()
+    t1 = now.strftime("%Y%m0100000")
+    t2 = now.strftime("%Y%m%d%H%M%S")[:-1]
+    arg1 = idarg
+    arg1 = request.args.get("from")
+    arg2 = request.args.get("to")
+
+    if arg1:
+        if arg1.isdigit() and len(arg1) == 13:
+            t1 = arg1
+    if arg2:
+        if date_frmt.match(arg2) and len(arg2) == 13:
+            t2 = arg2
+
+
     sqlcursor = mydb.cursor()
-    #sqlcursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " + id + " AND direction = 'out'")
-    #results = sqlcursor.fetchall()
-    sqlcursor.execute("SELECT id, truckTara FROM transactions WHERE id = " + str(id) )
-    results = sqlcursor.fetchall()
-    temp = ""
-    if not results:
-        temp = "na"
+
+    sqlcursor.execute("SELECT id, datetime, direction, truck, truckTara FROM transactions WHERE truck = %s AND datetime > %s AND datetime < %s", (idarg, t1, t2))
+    query_result = sqlcursor.fetchall()
+
+    if not query_result:
+        sqlcursor.execute("SELECT id, datetime, direction, containers, truckTara FROM transactions WHERE containers like '%" + idarg + "%' AND datetime > %s AND datetime < %s", (t1, t2))
+        query_result = sqlcursor.fetchall()
+
+    mydb.close()
+
+
+    if query_result:
+        tara = query_result[-1][4]
+        sessions = []
+        for line in query_result:
+            if line[2] == "in":
+                sessions.append(line[0])
+
+
+        data = {
+            'id': idarg,
+            'tara': tara,
+            'sessions': sessions 
+        }
+
+        result = json.dumps(data)
+
     else:
-        temp = results[0][1]
-    data = {}
-    data = {
-        'id': str(id),
-        'tara': str(temp),
-        'sessions': str(t2) ###
-    }
-    # mydb.close()
-    return str(data)
+        result = abort(404)
+
+    return result
+
 
 @app.route('/session/<id>')
 def session(id):
