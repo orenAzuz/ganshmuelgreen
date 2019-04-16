@@ -25,9 +25,20 @@ def index():
 
 @app.route('/health')
 def health():
-    ## code ...
-    # mydb.close()
-    return "OK"
+    try:
+        mydb = mysql.connector.connect(
+            host=os.environ['DB_HOST'],
+            user="root",
+            passwd="greengo",
+            database="weight",
+            auth_plugin='mysql_native_password'
+        )
+        sqlcursor = mydb.cursor()
+        sqlcursor.execute("SELECT 1;")
+        mydb.close()
+        return 'OK', 200
+    except:
+        return 'Failure', 500
 
 @app.route('/weight', methods=['POST'])
 def weight():
@@ -163,7 +174,7 @@ def session(id):
     json_data = []
     for result in results:
         json_data.append(dict(zip(row_headers, result)))
-    return json.dumps(json_data)
+    return json.dumps(json_data)[1:][:-1]
 
     # SPEC:
     #
