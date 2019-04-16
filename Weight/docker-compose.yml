@@ -22,7 +22,7 @@ services:
     container_name: weigh-app-c
     image: weigh-app
     ports:
-      - "8081:8000"
+      - 8081:8000
     environment:
       DB_HOST: mysql-c
     build: 
