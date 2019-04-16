@@ -10,7 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
       - db_data:/var/lib/mysql
-      - ${DB_SCRIPT_PATH}:/docker-entrypoint-initdb.d/
+      - ${PWD}/sql:/docker-entrypoint-initdb.d/
     # all ports available via shared network
     networks:
       - shared
@@ -19,7 +19,7 @@ services:
     container_name: billsrv
     image: billsrvimg
     ports:
-          - ${APP_EXT_PORT}:${APP_INT_PORT}
+          - 8082:8080
     build: 
       context: ./app
       dockerfile: Dockerfile  
@@ -39,7 +39,7 @@ volumes:
       type: none
       o: bind
       # set based on your environment
-      device: "${APP_DATA_PATH}"
+      device: "${PWD}"
 
   db_data:
     driver: local
@@ -47,7 +47,7 @@ volumes:
       type: none
       o: bind
       # set based on your environment
-      device: "${DB_DATA_PATH}"
+      device: "${HOME}/billdb"
 
 networks:
   shared:

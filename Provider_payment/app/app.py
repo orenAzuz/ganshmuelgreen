@@ -5,6 +5,9 @@ import pymysql.cursors
 from flask import Flask
 import urllib
 import json 
+from flask import send_file
+import csv
+
 
 app = Flask(__name__)
 
@@ -16,7 +19,7 @@ HOST = "0.0.0.0"
 def health():
 	if checkDBConnection() == 1:
 		return "Payment team is OK"
-	return "410 No Database Connection"
+	return "No Database Connection", 410
 
 
 @app.route('/provider/<name>', methods=['POST'])
@@ -41,12 +44,17 @@ def updateProvider(id, name):
 	return "Update provider name by id:" + str(id) + ". New name is: " + name
 
 
-@app.route('/rates', methods=['GET', 'POST'])
+@app.route('/rates', methods=['GET'])
 def rates():
-	if flask.request.method == 'POST':
-		return "Post rates"
-	else:
-		return getRateFile()
+	return getRateFile()
+
+
+@app.route('/rates', methods=['POST'])
+def getRates():
+	query = "DELETE FROM Rates;"
+	runQuery(query) 
+	insertNewRates()
+	return 'Rates Are Up To Date'
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['POST'])
@@ -126,7 +134,37 @@ def runQuery(query):
 
 
 def getRateFile():
-	pass
+	try:
+		return send_file('/in/rates.csv', attachment_filename='rates.csv')
+	except Exception as e:
+		print(str(e))
+		return "File Not Found", 415
+
+
+def insertNewRates():
+	filename = "/in/rates.csv"
+	# filename = "rates.csv"
+
+	query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
+
+	with open(filename) as csv_file:
+		csv_reader = csv.reader(csv_file, delimiter=',')
+		line_count = 0
+
+		for row in csv_reader:
+			if line_count == 0:
+				print('Column names are ' + ", ".join(row))
+			elif line_count == 1:
+				query += '(' + row[0] + ',' + row[1] + ',\'' +  row[2] + '\')'
+			else:
+				query += ', (' + row[0] + ',' + row[1] + ',\'' +  row[2] + '\')'
+			line_count += 1
+		if line_count > 1:
+			query += ';';
+			print('Query is: ' + query)
+			runQuery(query)
+
+	print('Processed ' + str(line_count - 1) + ' lines.')
 
 
 def createJsonResponse():
