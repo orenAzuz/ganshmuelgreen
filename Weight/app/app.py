@@ -1,7 +1,6 @@
 #!/usr/bin/env python
- 
 from flask import Flask
-
+import mysql.connector
 app = Flask(__name__)
 
 @app.route('/health')
@@ -18,7 +17,22 @@ def batch_weight():
 
 @app.route('/unknown')
 def unknown():
-    return "OK"
+    mydb = mysql.connector.connect(
+      host="mysql-db",
+      user="root",
+      passwd="greengo",
+      database="weight",
+      auth_plugin='mysql_native_password'
+    )
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT container_id from containers_registered where weight like NULL")
+    result = mycursor.fetchall()
+    ret = ""
+    ret = '\n'.join(map(str, result))
+    if ret=="":
+        return "There is none UNKNOWN weight"
+    else:
+        return ret
 
 @app.route('/item/<id>')
 def item(id):
