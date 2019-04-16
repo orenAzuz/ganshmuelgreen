@@ -6,7 +6,7 @@ services:
     image: mysql
     # ports used for development
     ports:
-      - 3306:3306
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
@@ -22,7 +22,7 @@ services:
     container_name: weigh-app-c
     image: weigh-app
     ports:
-      - 8081:8000
+      - "8081:8000"
     environment:
       DB_HOST: mysql-c
     build: 
