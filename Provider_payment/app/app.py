@@ -4,7 +4,7 @@ import pymysql
 import pymysql.cursors
 from flask import Flask
 import urllib
-import json
+import json 
 
 app = Flask(__name__)
 
@@ -23,16 +23,15 @@ def health():
 def createProvider(name):
     connection = getConnection()
     query = "INSERT INTO Provider (`name`) VALUES ('" + name + "');"
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        providerID = cursor.lastrowid
+    try:
+    	with connection.cursor() as cursor:
+        	cursor.execute(query)
+        	providerID = cursor.lastrowid
         connection.commit()
-
-    data = {
-        str(providerID): name,
-    }
-    return json.dumps(data)
-
+	finally:
+		connection.close()
+    return json.dumps({str(providerID): name})
+	
 
 @app.route('/provider/<id>/<name>', methods=['PUT'])
 def updateProvider(id, name):
@@ -79,41 +78,39 @@ def bill(id):
     t2 = flask.request.args.get("to")
     return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
     data = {
-        "id": "",
-        "name": "",
-        "from": "",
-        "to": "",
-        "truckCount": "",
-        "sessionCount": "",
-        "products": [
+    "id": "",
+    "name": "",
+    "from": "",
+    "to": "",
+    "truckCount": "",
+    "sessionCount": "",
+    "products": [
             {"product": "",
-             "count": "",
-             "amount": "",
-             "rate": "",
-             "pay": ""
+        "count": "", 
+        "amount": "", 
+        "rate": "", 
+        "pay": "" 
              }, ...
-        ],
-        "total": ""
-    }
+    ],
+    "total": "" 
+}
 
 
 # local functions
 
 def checkDBConnection():
-    #    try:
-    db = pymysql.connect(host=HOST, port=8082, user="root", passwd="greengo", db="billdb")
-    # db = pymysql.connect(host="localhost",user="root",passwd="greengo",db="billdb")
-    #    except Exception:
-    #        print("Error in MySQL connection")
-    #        return 0
-    #    else:
-    #        print("Connection Good!")
-    #        db.close()
+    try:
+    db = pymysql.connect(host="mysql-db",port=3306,user="root",passwd="greengo",db="billdb", auth_plugin_map="")
+    except Exception:
+        print("Error in MySQL connection")
+        return 0
+    else:
+        print("Connection Good!")
+        db.close() 
     return 1
-    # run query
 
 def getConnection():
-    return pymysql.connect(host=HOST, port=8082, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
+    return pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
 def runQuery(query):
     # Connect to the database
