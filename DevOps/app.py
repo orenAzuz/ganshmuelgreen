@@ -38,10 +38,10 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
-	print('request.get_data : ',request.get_data)
+	print('request.get_data : ',request.get_json())
 	print('request.query_string : ',request.query_string)
 	subprocess.call(['./reload.sh'])
-	mestxt = "RELOAD OK: new deploy from git. branch -> master. "
+	mestxt = "New deploy from git. branch -> master. "
 	send_mail(mestxt)
 	return render_template('index.html',message=mestxt)
 
