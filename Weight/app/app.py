@@ -7,42 +7,60 @@ import os
 import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask
-from flask_api import status
+#from flask_api import status
 
 app = Flask(__name__)
 
 @app.route('/health')
 def health():
     ## code ...
-    mydb.close()
     return "OK"
 
 @app.route('/weight', methods=['POST'])
 def weight():
     ## code ...
-    mydb.close()
     return "OK"
 
 @app.route('/batch-weight')
 def batch_weight():
     ## code ...
-    mydb.close()
     return "OK"
 
 @app.route('/unknown')
 def unknown():
     ## code ...
-    mydb.close()
     return "OK"
 
 @app.route('/item/<id>', methods=['GET'])
 def item(id):
+    t1 = flask.request.args.get("from")
+    if str(t1) == "None":
+        t1="000000"
+    t2 = flask.request.args.get("to")
+    if str(t2) == "None":
+        t2="Now"
+    mydb = mysql.connector.connect(
+        host=os.environ['DB_HOST'],
+        user="root",
+        passwd="greengo",
+        database="weight",
+        auth_plugin='mysql_native_password'
+    )
+    sqlcursor = mydb.cursor()
+    #sqlcursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " + id + " AND direction = 'out'")
+    #results = sqlcursor.fetchall()
+    sqlcursor.execute("SELECT id, truckTara FROM transactions WHERE id = " + str(id) )
+    results = sqlcursor.fetchall()
+    temp = ""
+    if not results:
+        temp = "na"
+    else:
+        temp = results[0][1]
     data = {}
-    
     data = {
         'id': str(id),
-        'tara': '000',  ###
-        'sessions': '???' ###
+        'tara': str(temp),
+        'sessions': str(t2) ###
     }
     mydb.close()
     return str(data)
