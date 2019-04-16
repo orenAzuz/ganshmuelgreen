@@ -1,59 +1,58 @@
 version: '3'
 services:
 
-  mysql-db:
-    container_name: mysql-c
-    image: mysql
-    # ports used for development
+  devops-app:
+    container_name: ${DEVOPS_CONTAINER}-app
     ports:
-      - 3306:3306
+      - ${DEVOPS_PORT}:5000
+    build: 
+      context: ${DEVOPS_HOME}
+      dockerfile: Dockerfile  
+
+  weigh-mysql-db:
+    container_name: ${WEIGH_CONTAINER}-mysql
+    image: mysql
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
-      - db_data:/var/lib/mysql
-      - ${DB_SCRIPT_PATH}:/db_scripts
-      # this directory is used to automatically load all scripts found in there 
-      - ${DB_AUTO_RUN_SCRIPTS}:/docker-entrypoint-initdb.d
+      - weigh_db_data:/var/lib/mysql
+      - ${WEIGH_DB_SCRIPT_PATH}:/db_scripts
     # all ports available via shared network
     networks:
       - shared
 
   weigh-app:
-    container_name: weigh-app-c
-    image: weigh-app
+    container_name: ${WEIGH_CONTAINER}-app
     ports:
-      - "8081:8000"
-    environment:
-      DB_HOST: mysql-c
+      - "${WEIGH_PORT}:8000"
     build: 
-      context: ./app
+      context: ${WEIGH_HOME}/app
       dockerfile: Dockerfile  
     networks:
       - shared
     volumes:
-      - ./app:/app
-      - app_data:/in
+      - weigh_app_data:/in
     entrypoint: 
       - python3 
       - app.py
 
 
 volumes:
-  app_data:
+  weigh_app_data:
     driver: local
     driver_opts:
       type: none
       o: bind
       # set based on your environment
-      device: "${APP_DATA_PATH}"
+      device: "${WEIGH_APP_DATA_PATH}"
 
-  db_data:
+  weigh_db_data:
     driver: local
     driver_opts:
       type: none
       o: bind
       # set based on your environment
-      device: "${DB_DATA_PATH}"
+      device: "${WEIGH_DB_DATA_PATH}"
 
 networks:
   shared:
