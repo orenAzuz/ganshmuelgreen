@@ -24,14 +24,14 @@ def createProvider(name):
     connection = getConnection()
     query = "INSERT INTO Provider (`name`) VALUES ('" + name + "');"
     try:
-    	with connection.cursor() as cursor:
-        	cursor.execute(query)
-        	providerID = cursor.lastrowid
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            providerID = cursor.lastrowid
         connection.commit()
-	finally:
-		connection.close()
+    finally:
+        connection.close()
     return json.dumps({str(providerID): name})
-	
+
 
 @app.route('/provider/<id>/<name>', methods=['PUT'])
 def updateProvider(id, name):
