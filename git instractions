@@ -1,6 +1,6 @@
 git remote add origin https://github.com/orenAzuz/ganshmuelgreen.git
 git push -u origin master
+ssh -i student-gan-shmuel.pem ubuntu@13.59.7.207
 
---- server ---
-GREEN ip
-13.59.7.207
+
+https://github.com/orenAzuz/ganshmuelgreen/invitations

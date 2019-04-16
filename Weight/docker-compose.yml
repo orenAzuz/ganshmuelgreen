@@ -1,0 +1,59 @@
+version: '3'
+services:
+
+  mysql-db:
+    container_name: mysql-c
+    image: mysql
+    # ports used for development
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: greengo
+    volumes:
+      - db_data:/var/lib/mysql
+      - ${DB_SCRIPT_PATH}:/db_scripts
+      # this directory is used to automatically load all scripts found in there 
+      - ${DB_AUTO_RUN_SCRIPTS}:/docker-entrypoint-initdb.d
+    # all ports available via shared network
+    networks:
+      - shared
+
+  weigh-app:
+    container_name: weigh-app-c
+    image: weigh-app
+    ports:
+      - "8081:8000"
+    environment:
+      DB_HOST: mysql-c
+    build: 
+      context: ./app
+      dockerfile: Dockerfile  
+    networks:
+      - shared
+    volumes:
+      - app_data:/in
+    entrypoint: 
+      - python3 
+      - app.py
+
+
+volumes:
+  app_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${APP_DATA_PATH}"
+
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${DB_DATA_PATH}"
+
+networks:
+  shared:
+    driver: bridge

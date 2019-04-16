@@ -5,5 +5,3 @@ export DB_DATA_PATH=$HOME/billdb
 export DB_SCRIPT_PATH=$PWD/sql
 export APP_EXT_PORT=8082
 export APP_INT_PORT=8080
-export DB_EXT_PORT=8083
-export DB_INT_PORT=3306

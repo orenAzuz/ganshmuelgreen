@@ -1,0 +1,68 @@
+Confirm:
+	Health check - check not only on PC
+	Yaneev > Omri approval process?
+	Python logging STD??  ...teams
+		SDT lib
+
+DevOPS
+	Emails for all >>>> health 
+	Confirm: Python version 3.7
+	Python Alpine image + Flask sufficient?
+	
+Logic:
+	Force>>> what is this/who will use?
+	Many containers HAS same product!
+
+Design
+	Arch
+		Mysql DB >> TBC
+		Python Alpine image + Flask sufficient
+		> Alpine > Prod (multi-stage)
+		
+	/health GET
+		as per doc
+		application is running
+		… just return OK for now
+
+	Table
+		designs
+		
+	One base dockerfile - 
+		...weight
+		...payment
+		...devops
+			/health
+	
+	github key sent
+
+
+	
+
+One branch per team – named per team name
+Merge at least once a day	
+Each day system should be as working as possible
+green.deveap.com
+one server >>> demos would be on there
+
+Create task with stickers for DEVs to move
+
+DEVOPS base image
+each team also has container 
+
+
+DB decision
+	seperate – not shared
+
+start with prototypes for producers to test
+let producers know as soon as new prototype is available for them to test
+
+
+
+seperate dirs for each app / team
+	app.py in each dir
+	
+CI to be ready by?
+
+Git hooks to be used
+
+To be on AWS – green.develeap.com … runs always
