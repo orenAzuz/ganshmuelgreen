@@ -23,6 +23,8 @@ services:
     image: weigh-app
     ports:
       - "8081:8000"
+    environment:
+      DB_HOST: mysql-c
     build: 
       context: ./app
       dockerfile: Dockerfile  

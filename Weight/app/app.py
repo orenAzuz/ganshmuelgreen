@@ -3,20 +3,11 @@ from __future__ import print_function
 import flask
 import json
 import logging
+import os
 import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask
 from flask_api import status
-# from flask import jsonify
-
-mydb = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  passwd="greengo",
-  database="weight",
-  auth_plugin='mysql_native_password'
-)
-
 
 app = Flask(__name__)
 
@@ -58,6 +49,14 @@ def item(id):
 
 @app.route('/session/<id>')
 def session(id):
+    mydb = mysql.connector.connect(
+        host=os.environ['DB_HOST'],
+        user="root",
+        passwd="greengo",
+        database="weight",
+        auth_plugin='mysql_native_password'
+    )
+
     sqlcursor = mydb.cursor()
 
     sqlcursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " +
