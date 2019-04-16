@@ -6,7 +6,7 @@ services:
     image: mysql
     # ports used for development
     ports:
-      - 3306:3306
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
@@ -31,6 +31,7 @@ services:
     networks:
       - shared
     volumes:
+      - ./app:/app
       - app_data:/in
     entrypoint: 
       - python3 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from flask import Flask, render_template, request, json
+from flask_mail import Mail, Message
 import requests
 import subprocess
 import datetime
@@ -29,7 +30,6 @@ def api_root():
 	mestxt = "ROOT OK"
 	return render_template('index.html',message=mestxt)
 
-
 @app.route("/health")
 def api_health():
 	mestxt = "HEALTH OK"
@@ -38,10 +38,10 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
-	print('request.get_data : ',request.get_data)
+	print('request.get_data : ',request.get_json())
 	print('request.query_string : ',request.query_string)
 	subprocess.call(['./reload.sh'])
-	mestxt = "RELOAD OK: new deploy from git. branch -> master. "
+	mestxt = "New deploy from git. branch -> master. "
 	send_mail(mestxt)
 	return render_template('index.html',message=mestxt)
 
