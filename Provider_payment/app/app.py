@@ -12,7 +12,7 @@ app = Flask(__name__)
 def health():
     if checkDBConnection() == 1:
         return "Payment team is OK"
-    return "Failure1"
+    return "410 No Database Connection"
 
 
 @app.route('/provider/<name>', methods=['POST'])
@@ -90,25 +90,22 @@ def bill(id):
 }
 
 
-
 #local functions
 
 def checkDBConnection():
-#    try:
-    db = pymysql.connect(host="mysql-db",port=3306,user="root",passwd="greengo",db="billdb", auth_plugin_map="")
-        #db = pymysql.connect(host="localhost",user="root",passwd="greengo",db="billdb")
-#    except Exception:
-#        print("Error in MySQL connection")
-#        return 0
-#    else:
-#        print("Connection Good!")
-#        db.close() 
+    try:
+        db = pymysql.connect(host="mysql-db",port=3306,user="root",passwd="greengo",db="billdb", auth_plugin_map="")
+    except Exception:
+        print("Error in MySQL connection")
+        return 0
+    else:
+        print("Connection Good!")
+        db.close() 
     return 1
-    #run query
+
 
 def runQuery(query):
-    # Connect to the database
-    connection = pymysql.connect(host="localhost",port=8082,user="root",passwd="greengo",db="billdb", charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+    connection = pymysql.connect(host="mysql-db",port=3306,user="root",passwd="greengo",db="billdb", charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
 
     try:
         with connection.cursor() as cursor:
@@ -118,8 +115,10 @@ def runQuery(query):
     finally:
         connection.close()
 
+
 def getRateFile():
     pass
+
 
 def createJsonResponse():
     return ""
