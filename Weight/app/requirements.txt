@@ -6,3 +6,5 @@ Jinja2==2.10.1
 MarkupSafe==1.1.1
 Werkzeug==0.15.2
 WTForms==2.2.1
+mysql-connector-python==8.0.15
+Flask-API==1.1
