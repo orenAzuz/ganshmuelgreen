@@ -1,0 +1,59 @@
+version: '3'
+services:
+
+  devops-app:
+    container_name: ${DEVOPS_CONTAINER}-app
+    ports:
+      - ${DEVOPS_PORT}:5000
+    build: 
+      context: ${DEVOPS_HOME}
+      dockerfile: Dockerfile  
+
+  weigh-mysql-db:
+    container_name: ${WEIGH_CONTAINER}-mysql
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: greengo
+    volumes:
+      - weigh_db_data:/var/lib/mysql
+      - ${WEIGH_DB_SCRIPT_PATH}:/db_scripts
+    # all ports available via shared network
+    networks:
+      - shared
+
+  weigh-app:
+    container_name: ${WEIGH_CONTAINER}-app
+    ports:
+      - "${WEIGH_PORT}:8000"
+    build: 
+      context: ${WEIGH_HOME}/app
+      dockerfile: Dockerfile  
+    networks:
+      - shared
+    volumes:
+      - weigh_app_data:/in
+    entrypoint: 
+      - python3 
+      - app.py
+
+
+volumes:
+  weigh_app_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${WEIGH_APP_DATA_PATH}"
+
+  weigh_db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${WEIGH_DB_DATA_PATH}"
+
+networks:
+  shared:
+    driver: bridge
