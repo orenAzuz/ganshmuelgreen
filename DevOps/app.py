@@ -1,11 +1,8 @@
 #!/usr/bin/python3
 
 from flask import Flask, render_template, request, json
-<<<<<<< HEAD
 from flask_mail import Mail, Message
-=======
 import requests
->>>>>>> b99f40ceb4f302a3bc0f5c0f3d87a7bdbb9a9aa9
 import subprocess
 import datetime
 #PORT = 8000
