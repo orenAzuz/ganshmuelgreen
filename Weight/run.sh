@@ -15,5 +15,5 @@ export DB_AUTO_RUN_SCRIPTS=./mysql/auto-run-scripts
 
 mkdir -p ./mysql/datadir
 
-docker-compose stop
+docker-compose down
 docker-compose up
