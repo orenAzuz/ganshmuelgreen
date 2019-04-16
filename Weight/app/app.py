@@ -44,11 +44,7 @@ def health():
     except:
         return 'Failure', 500
 
-<<<<<<< HEAD
 @app.route('/weight',methods = ['GET'])
-=======
-@app.route('/weight', methods=['GET', 'POST'])
->>>>>>> weight /item service
 def weight():
     mydb = mysql.connector.connect(
       host="mysql-db",
@@ -150,27 +146,15 @@ def unknown():
     else:
         return ret
 
-<<<<<<< HEAD
-@app.route('/item/<id>', methods=['GET'])
-def item(id):
-    t1 = flask.request.args.get("from")
-    if str(t1) == "None":
-        t1="000000"
-    t2 = flask.request.args.get("to")
-    if str(t2) == "None":
-        t2="Now"
-=======
-
 @app.route('/item/<idarg>', methods=['GET'])
 def item(idarg):
 
->>>>>>> weight /item service
     mydb = mysql.connector.connect(
-      host=os.environ['DB_HOST'],
-      user="root",
-      passwd="greengo",
-      database="weight",
-      auth_plugin='mysql_native_password'
+        host=os.environ['DB_HOST'],
+        user="root",
+        passwd="greengo",
+        database="weight",
+        auth_plugin='mysql_native_password'
     )
 
 
@@ -209,11 +193,11 @@ def item(idarg):
                 sessions.append(line[0])
 
 
-        data = {
+    data = {
             'id': idarg,
             'tara': tara,
             'sessions': sessions 
-        }
+    }
 
         result = json.dumps(data)
 
