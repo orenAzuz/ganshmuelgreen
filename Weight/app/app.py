@@ -22,21 +22,25 @@ app = Flask(__name__)
 
 @app.route('/health')
 def health():
+    ## code ...
     mydb.close()
     return "OK"
 
-@app.route('/weight')
+@app.route('/weight', methods=['POST'])
 def weight():
+    ## code ...
     mydb.close()
     return "OK"
 
 @app.route('/batch-weight')
 def batch_weight():
+    ## code ...
     mydb.close()
     return "OK"
 
 @app.route('/unknown')
 def unknown():
+    ## code ...
     mydb.close()
     return "OK"
 
@@ -101,4 +105,5 @@ def session(id):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=8000,debug=True)
+
 mydb.close()
