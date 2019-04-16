@@ -11,28 +11,91 @@ from flask_api import status
 
 app = Flask(__name__)
 
+@app.route('/')
+def index():
+    services='''
+    /health <br>
+    /weight <br>
+    /batch-weight/&lt;file&gt; <br>
+    /unknown <br>
+    /item/&lt;id&gt; <br>
+    /session/&lt;id&gt; <br>
+    '''
+    return services
+
 @app.route('/health')
 def health():
     ## code ...
-    mydb.close()
+    # mydb.close()
     return "OK"
 
 @app.route('/weight', methods=['POST'])
 def weight():
     ## code ...
-    mydb.close()
+    # mydb.close()
     return "OK"
 
-@app.route('/batch-weight')
-def batch_weight():
-    ## code ...
+@app.route('/batch-weight/<file>')
+def batch_weight(file):
+
+    results="Field added:<br>"
+
+    mydb = mysql.connector.connect(
+      host=os.environ['DB_HOST'],
+      user="root",
+      passwd="greengo",
+      database="weight",
+      auth_plugin='mysql_native_password'
+    )
+
+    sqlcursor = mydb.cursor()
+
+    if file in os.listdir("in/"):
+        if file.lower().endswith(('.csv')):
+            new_batch = open("in/"+file)
+            lines = new_batch.readlines()
+            unit = lines[0][:-1].split(',')[1]
+            if unit[0] == '"' and unit[-1] == '"':
+                unit = unit[1:-1]
+            for line in lines[1:]:
+                container_id = line.split(',')[0]
+                weight = line.split(',')[1]
+
+                try:
+                    # insert to table containers_registered id, weight and unit
+                    sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                    results+= container_id + " " + weight + " " + unit + "<br>"
+                except mysql.connector.IntegrityError:
+                    pass
+
+
+
+
+        elif file.lower().endswith(('.json')):
+            new_batch = open("in/"+file)
+            lines = json.load(new_batch)
+            for line in lines:
+                container_id = line["id"]
+                weight = line["weight"]
+                unit = line["unit"]
+
+                try:
+                    # insert to table containers_registered id, weight and unit
+                    sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                    results+= container_id + " " + str(weight) + " " + unit + "<br>"
+                except mysql.connector.IntegrityError:
+                    pass 
+
+
+        new_batch.close()
+
     mydb.close()
-    return "OK"
+    return results
 
 @app.route('/unknown')
 def unknown():
     ## code ...
-    mydb.close()
+    # mydb.close()
     return "OK"
 
 @app.route('/item/<id>', methods=['GET'])
@@ -44,7 +107,7 @@ def item(id):
         'tara': '000',  ###
         'sessions': '???' ###
     }
-    mydb.close()
+    # mydb.close()
     return str(data)
 
 @app.route('/session/<id>')
