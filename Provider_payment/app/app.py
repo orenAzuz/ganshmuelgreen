@@ -67,7 +67,7 @@ def updateTruck(id, provider_id):
 def getTruck(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
-    weightUrl = "http://0.0.0.0:8081/item/" + str(id)
+    weightUrl = "http://green,develeap.com:8081/item/" + str(id)
     response = urllib.request.urlopen(weightUrl)
     return response.read()
 
@@ -76,24 +76,34 @@ def getTruck(id):
 def bill(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
-    return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
+    #return "Get Bill by id: " + str(id) + "and in range: " + str(t1) + ":" + str(t2)
+    connection = getConnection()
+    #Get trucks by provider id
+    query = "SELECT ('id') FROM Trucks WHERE 'provider_id'=%s ;"
+    try:
+        with connection.cursor() as cursor:
+            result = cursor.execute(query,(str(id)),)
+        connection.commit()
+    finally:
+        connection.close()
     data = {
-    "id": "",
-    "name": "",
-    "from": "",
-    "to": "",
-    "truckCount": "",
-    "sessionCount": "",
-    "products": [
+        "id": "",
+        "name": "",
+        "from": "",
+        "to": "",
+        "truckCount": "",
+        "sessionCount": "",
+        "products": [
             {"product": "",
-        "count": "", 
-        "amount": "", 
-        "rate": "", 
-        "pay": "" 
+             "count": "",
+             "amount": "",
+             "rate": "",
+             "pay": ""
              }, ...
-    ],
-    "total": "" 
-}
+        ],
+        "total": ""
+    }
+    return json.dumps(data)
 
 
 #local functions
