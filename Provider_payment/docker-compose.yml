@@ -1,0 +1,54 @@
+version: '2'
+services:
+
+  mysql-db:
+    container_name: billdb
+    image: mysql
+    ports:
+          - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: greengo
+    volumes:
+      - db_data:/var/lib/mysql
+      - ${DB_SCRIPT_PATH}:/docker-entrypoint-initdb.d/
+    # all ports available via shared network
+    networks:
+      - shared
+
+  bill-app:
+    container_name: billsrv
+    image: billsrvimg
+    ports:
+          - ${APP_EXT_PORT}:${APP_INT_PORT}
+    build: 
+      context: ./app
+      dockerfile: Dockerfile  
+    networks:
+      - shared
+    volumes:
+      - app_data:/in
+    entrypoint: 
+      - python3 
+      - app.py
+
+
+volumes:
+  app_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${APP_DATA_PATH}"
+
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # set based on your environment
+      device: "${DB_DATA_PATH}"
+
+networks:
+  shared:
+    driver: bridge
