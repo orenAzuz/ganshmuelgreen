@@ -9,8 +9,7 @@ RUN mkdir -p /app/templates
 WORKDIR /app
 
 COPY requirements.txt .
-#RUN pip3 install -r requirements.txt --src /usr/local/src
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt --src /usr/local/src
 #RUN pip3 install flask
 
 COPY templates/index.html templates/
