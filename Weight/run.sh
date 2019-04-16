@@ -1,4 +1,6 @@
-# Read in via: source <filename>
+# This will create two containers called mysql-c and weigh-app-c, you can see them running with docker ps
+# to enter the app run docker exec -it weigh-app-c sh
+# it will be able to communicate with the db accessing it with the image name mysql-c
 
 export APP_DATA_PATH=./app/in
 
@@ -11,8 +13,7 @@ export DB_SCRIPT_PATH=./mysql/scripts
 # This script directory is mounted into MySQL container in a location that causes it to auto-run all scripts there
 export DB_AUTO_RUN_SCRIPTS=./mysql/auto-run-scripts
 
-# set the environmental variables according to your filesystem, create directories if needed
-# run docker-compose up
-# it will create two containers called mysql-c and weigh-app-c, you can see them running with docker ps
-# to enter the app run docker exec -it weigh-app-c sh
-# it will be able to communicate with the db accessing it with the image name mysql-c
+mkdir -p ./mysql/datadir
+
+docker-compose stop
+docker-compose up
