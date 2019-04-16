@@ -1,0 +1,30 @@
+#!/bin/sh
+set -e
+
+echo "Starting build containers ..."
+
+WORKING_DIR=$1
+cd $WORKING_DIR
+echo "Working folder is $PWD"
+. ./env.ini
+
+#echo "HOME DATA folder is $HOME_DATA"
+#echo "WEIGH_DB_SCRIPT_PATH = $WEIGH_DB_SCRIPT_PATH"
+
+echo "Port is $DEVOPS_PORT"
+
+rm $LOGS/*.log
+#touch $LOGS/$ERRORS_LOG
+
+#errors logs
+#ERRORS_LOG='was_errors.log'
+
+devops_container_name=${DEVOPS_CONTAINER}'-app'
+#echo "Devops container is $devops_container_name"
+
+#docker-compose up $devops_container_name 1> $LOGS/out.log 2>$LOGS/errors.log 
+
+#for all services
+docker-compose up -d 1> $LOGS/out.log 2>$LOGS/errors.log 
+
+
