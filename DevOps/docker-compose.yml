@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile  
 
   weigh-mysql-db:
-    container_name: ${WEIGH_CONTAINER}-mysql
+    container_name: ${WEIGH_CONTAINER}-mysql-db
     image: mysql
     environment:
       MYSQL_ROOT_PASSWORD: greengo
