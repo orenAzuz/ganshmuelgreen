@@ -95,7 +95,7 @@ def bill(id):
 
 def checkDBConnection():
 #    try:
-    db = pymysql.connect(host="localhost",port=8082,user="root",passwd="greengo",db="billdb")
+    db = pymysql.connect(host="mysql-db",port=3306,user="root",passwd="greengo",db="billdb", auth_plugin_map="")
         #db = pymysql.connect(host="localhost",user="root",passwd="greengo",db="billdb")
 #    except Exception:
 #        print("Error in MySQL connection")
