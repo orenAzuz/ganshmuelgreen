@@ -13,7 +13,8 @@ echo "Working folder is $PWD"
 
 echo "Port is $DEVOPS_PORT"
 
-rm $LOGS/*.log
+rm -r $LOGS
+mkdir $LOGS
 #touch $LOGS/$ERRORS_LOG
 
 #errors logs
