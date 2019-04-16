@@ -44,8 +44,6 @@ def health():
         return 'Failure', 500
 
 @app.route('/weight',methods = ['GET'])
-@app.route('/weight')
-@app.route('/weight', methods=['POST'])
 def weight():
     mydb = mysql.connector.connect(
       host="mysql-db",
@@ -70,10 +68,6 @@ def weight():
         json_data.append(content)
         content = {}
     return json.dumps(json_data)
-    return "OK"
-    ## code ...
-    # mydb.close()
-    return "OK"
 
 @app.route('/batch-weight/<file>')
 def batch_weight(file):
@@ -150,10 +144,6 @@ def unknown():
         return "There is none UNKNOWN weight"
     else:
         return ret
-    return "OK"
-    ## code ...
-    # mydb.close()
-    return "OK"
 
 @app.route('/item/<id>', methods=['GET'])
 def item(id):
