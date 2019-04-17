@@ -449,8 +449,14 @@ def weight():
             if not truck:
                 return "Required 'truck' value not supplied (400)", 400
 
-            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
+
+            if len(in_or_out) == 0:
+                # No previous record for this truck, insert
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
+                           "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
+                return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
             if in_or_out[0][1] == 'in':
                 # in after in
@@ -477,7 +483,6 @@ def weight():
                 run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
                              "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
                 # return info - only for in
-                logging.debug("changing value")
                 return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
             elif in_or_out[0][1] == 'none':
@@ -501,6 +506,11 @@ def weight():
 
             in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
+
+            if len(in_or_out) == 0:
+                logging.error("'out' for truck that has no previous 'in' - not allowed (400)")
+                return "'out' for truck that has no previous 'in' - not allowed (400)", 400
+
 
             if in_or_out[0][1] == 'in' or (in_or_out[0][1] == 'out' and force == 'true'):
                 # this implies 'in' then 'out' ...
