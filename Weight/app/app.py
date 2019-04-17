@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #from __future__ import print_function
-from flask import Flask, request, abort
+from flask import Flask, request
 import mysql.connector, time
 import json
 import flask
@@ -295,7 +295,7 @@ def item(idarg):
         # result = line[3]
 
     else:
-        result = abort(404)
+        result = "Session ID not found (404)", 404
 
     return result
 
