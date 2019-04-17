@@ -171,7 +171,7 @@ def batch_weight(file):
                 try:
                     # insert to table containers_registered id, weight and unit
                     sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
-                    sqlcursor.commit()
+                    mydb.commit()
                     results+= container_id + " " + weight + " " + unit + "<br>"
                 except mysql.connector.IntegrityError:
                     pass
@@ -188,7 +188,7 @@ def batch_weight(file):
                 try:
                     # insert to table containers_registered id, weight and unit
                     sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
-                    sqlcursor.commit()
+                    mydb.commit()
                     results+= container_id + " " + str(weight) + " " + unit + "<br>"
                 except mysql.connector.IntegrityError:
                     pass 
