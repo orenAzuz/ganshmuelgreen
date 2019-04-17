@@ -4,7 +4,7 @@ import pymysql
 import pymysql.cursors
 from flask import Flask
 import urllib
-import json
+import json 
 from flask import send_file
 import csv
 
@@ -16,9 +16,9 @@ HOST = 'mysql-db'
 
 @app.route('/health')
 def health():
-    if checkDBConnection() == 1:
-        return "Payment team is OK"
-    return "No Database Connection", 410
+	if checkDBConnection() == 1:
+		return "Payment team is OK"
+	return "No Database Connection", 410
 
 
 @app.route('/provider/<name>', methods=['POST'])
@@ -45,15 +45,15 @@ def updateProvider(id, name):
 
 @app.route('/rates', methods=['GET'])
 def rates():
-    return getRateFile()
+	return getRateFile()
 
 
 @app.route('/rates', methods=['POST'])
 def getRates():
-    query = "DELETE FROM Rates;"
-    runQuery(query)
-    insertNewRates()
-    return 'Rates Are Up To Date'
+	query = "DELETE FROM Rates;"
+	runQuery(query) 
+	insertNewRates()
+	return 'Rates Are Up To Date'
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['POST'])
@@ -174,7 +174,8 @@ def bill(providerId):
 
 def checkDBConnection():
     try:
-        db = pymysql.connect(host=HOST, port=3306, user="root", passwd="greengo", db="billdb", auth_plugin_map="")
+        # db = pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", auth_plugin_map="")
+        db = getConnection()
     except Exception:
         print("Error in MySQL connection")
         return 0
@@ -203,37 +204,37 @@ def runQuery(query):
 
 
 def getRateFile():
-    try:
-        return send_file('/in/rates.csv', attachment_filename='rates.csv')
-    except Exception as e:
-        print(str(e))
-        return "File Not Found", 415
+	try:
+		return send_file('/in/rates.csv', attachment_filename='rates.csv')
+	except Exception as e:
+		print(str(e))
+		return "File Not Found", 415
 
 
 def insertNewRates():
-    filename = "/in/rates.csv"
-    # filename = "rates.csv"
+	filename = "/in/rates.csv"
+	# filename = "rates.csv"
 
-    query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
+	query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
 
-    with open(filename) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
+	with open(filename) as csv_file:
+		csv_reader = csv.reader(csv_file, delimiter=',')
+		line_count = 0
 
-        for row in csv_reader:
-            if line_count == 0:
-                print('Column names are ' + ", ".join(row))
-            elif line_count == 1:
-                query += '(' + ',\'' + row[0] + ',\'' + ',' + row[1] + ',\'' + row[2] + '\')'
-            else:
-                query += ', (' + ',\'' + row[0] + ',\'' + ',' + row[1] + ',\'' + row[2] + '\')'
-            line_count += 1
-        if line_count > 1:
-            query += ';';
-            print('Query is: ' + query)
-            runQuery(query)
+		for row in csv_reader:
+			if line_count == 0:
+				print('Column names are ' + ", ".join(row))
+			elif line_count == 1:
+				query += '(\'' + row[0] + '\',' + row[1] + ',\'' +  row[2] + '\')'
+			else:
+				query += ', (\'' + row[0] + '\',' + row[1] + ',\'' +  row[2] + '\')'
+			line_count += 1
+		if line_count > 1:
+			query += ';';
+			print('Query is: ' + query)
+			runQuery(query)
 
-    print('Processed ' + str(line_count - 1) + ' lines.')
+	print('Processed ' + str(line_count - 1) + ' lines.')
 
 
 def createJsonResponse():
