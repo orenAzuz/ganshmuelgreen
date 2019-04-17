@@ -11,7 +11,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask, request
 import datetime
-#from flask_api import status
+# from flask_api import status
 
 app = Flask(__name__)
 
@@ -77,7 +77,7 @@ def weight_json_in_or_none(mydb, last_insert_id):
         print("Getting session values (not for 'in' or 'none' session type)")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
     else:
-        return "Session ID not found (404)", status.HTTP_404_NOT_FOUND
+        return "Session ID not found (404)", 404
 
     json_data = []
     for result in results:
@@ -99,7 +99,7 @@ def weight_json_out(mydb, truck_previous_session_id):
         print("Getting session values (not for 'out' session type)")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
     else:
-        return "Session ID not found (404)", status.HTTP_404_NOT_FOUND
+        return "Session ID not found (404)", 404
 
     json_data = []
     for result in results:
@@ -306,7 +306,7 @@ def session(id):
             print("Getting session values (for 'in' or 'none' session type)")
             row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
         else:
-            return "Session ID not found (404)", status.HTTP_404_NOT_FOUND
+            return "Session ID not found (404)", 404
 
     json_data = []
     for result in results:
@@ -369,7 +369,7 @@ def weight():
             if in_or_out[0][1] == 'in':
                 # in after none
                 print("'none' after 'in' not allowed (400)")
-                return "'none' after 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "'none' after 'in' not allowed (400)", 400
             else:
                 print("'none' - normal")
                 run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
@@ -392,7 +392,7 @@ def weight():
                     return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
                 else:
                     print("'in' after 'in' without force not allowed (400)")
-                    return "'in' after 'in' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
+                    return "'in' after 'in' without force not allowed (400)", 400
 
             elif in_or_out[0][1] == 'out':
                 # in after out
@@ -414,7 +414,7 @@ def weight():
 
             else:
                 print("Operation unknown - not allowed (400)")
-                return "Operation unknown - not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "Operation unknown - not allowed (400)", 400
 
 
         if direction == 'out':
@@ -454,11 +454,11 @@ def weight():
             elif in_or_out[0][1] == 'out' and force != 'true':
                 # out after out ... not forced
                 print("'out' after 'out' without force not allowed (400)")
-                return "'out' after 'out' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "'out' after 'out' without force not allowed (400)", 400
 
             else:
                 print("'out' without 'in' not allowed (400)")
-                return "'out' without 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "'out' without 'in' not allowed (400)", 400
 
 
 if __name__ == "__main__":
