@@ -11,7 +11,6 @@ services:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
       - db_data:/var/lib/mysql
-      - ${GIT_HOME}/Weight/mysql/scripts:/db_scripts
       # this directory is used to automatically load all scripts found in there 
       - ${GIT_HOME}/Weight/mysql/auto-run-scripts:/docker-entrypoint-initdb.d
     # all ports available via shared network

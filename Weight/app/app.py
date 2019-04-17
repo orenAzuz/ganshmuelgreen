@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #from __future__ import print_function
-from flask import Flask, request, abort
+from flask import Flask, request
 import mysql.connector, time
 import json
 import flask
@@ -156,7 +156,7 @@ def batch_weight(file):
     )
 
     sqlcursor = mydb.cursor()
-
+#no
     if file in os.listdir("in/"):
         if file.lower().endswith(('.csv')):
             new_batch = open("in/"+file)
@@ -295,7 +295,7 @@ def item(idarg):
         # result = line[3]
 
     else:
-        result = abort(404)
+        result = "Session ID not found (404)", 404
 
     return result
 
@@ -353,7 +353,7 @@ def weight():
         f = request.args.get('filter', default="'in','out','none'")
         mycursor = mydb.cursor()
         arg = mycursor.execute(
-            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN " + t1 + " AND " + t2)
+            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN ('" + f + "') AND datetime BETWEEN " + t1 + " AND " + t2)
         result = mycursor.fetchall()
         json_data = []
         row_headers = [val[0] for val in mycursor.description]
