@@ -6,6 +6,7 @@ import requests
 import subprocess
 import datetime
 import json
+import time
 #PORT = 8000
 
 from flask_mail import Mail, Message
@@ -39,7 +40,8 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
-    subprocess.check_call(['./reload.sh'])
+    subprocess.call(['./reload.sh'])
+    time.sleep(200)
     data = json.loads(json.dumps(request.get_json()))
     commits = data["commits"]
     id = commits[0]
