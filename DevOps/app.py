@@ -81,7 +81,7 @@ def get_mail_list():
 
 
 def http_request(port):
-    url = "http://green.develeap.com:%s/health" % port
+    url = "http://18.222.236.224:%s/health" % port
     try:
         r = requests.get(url)
         return r.status_code
