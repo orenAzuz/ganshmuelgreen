@@ -11,7 +11,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask, request
 import datetime
-#from flask_api import status
+# from flask_api import status
 
 app = Flask(__name__)
 
@@ -77,7 +77,7 @@ def weight_json_in_or_none(mydb, last_insert_id):
         print("Getting session values (not for 'in' or 'none' session type)")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
     else:
-        return "Session ID not found (404)", status.HTTP_404_NOT_FOUND
+        return "Session ID not found (404)", 404
 
     json_data = []
     for result in results:
@@ -99,7 +99,7 @@ def weight_json_out(mydb, truck_previous_session_id):
         print("Getting session values (not for 'out' session type)")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
     else:
-        return "Session ID not found (404)", status.HTTP_404_NOT_FOUND
+        return "Session ID not found (404)", 404
 
     json_data = []
     for result in results:
@@ -171,6 +171,7 @@ def batch_weight(file):
                 try:
                     # insert to table containers_registered id, weight and unit
                     sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                    mydb.commit()
                     results+= container_id + " " + weight + " " + unit + "<br>"
                 except mysql.connector.IntegrityError:
                     pass
@@ -187,6 +188,7 @@ def batch_weight(file):
                 try:
                     # insert to table containers_registered id, weight and unit
                     sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                    mydb.commit()
                     results+= container_id + " " + str(weight) + " " + unit + "<br>"
                 except mysql.connector.IntegrityError:
                     pass 
@@ -232,7 +234,7 @@ def item(idarg):
     now = datetime.datetime.now()
     t1 = now.strftime("%Y%m0100000")
     t2 = now.strftime("%Y%m%d%H%M%S")[:-1]
-    arg1 = idarg
+
     arg1 = request.args.get("from")
     arg2 = request.args.get("to")
 
@@ -240,11 +242,13 @@ def item(idarg):
         if arg1.isdigit() and len(arg1) == 13:
             t1 = arg1
     if arg2:
-        if date_frmt.match(arg2) and len(arg2) == 13:
+        if arg2.isdigit() and len(arg2) == 13:
             t2 = arg2
 
 
     sqlcursor = mydb.cursor()
+
+    
 
     sqlcursor.execute("SELECT id, datetime, direction, truck, truckTara FROM transactions WHERE truck = %s AND datetime > %s AND datetime < %s", (idarg, t1, t2))
     query_result = sqlcursor.fetchall()
@@ -253,27 +257,43 @@ def item(idarg):
         sqlcursor.execute("SELECT id, datetime, direction, containers, truckTara FROM transactions WHERE containers like '%" + idarg + "%' AND datetime > %s AND datetime < %s", (t1, t2))
         query_result = sqlcursor.fetchall()
 
+        there_is_container = False
+
+        if query_result:
+            sessions = []
+            for line in query_result:
+                container_list = line[3].split(",")
+
+                for container in container_list:
+                    if idarg == container:
+                        if line[2] == "in" or line[2] == None:
+                            sessions.append(line[0])
+                            there_is_container = True
+
+                if there_is_container == False:
+                    query_result = None
+
+
     mydb.close()
 
 
     if query_result:
         tara = query_result[-1][4]
+
         sessions = []
         for line in query_result:
-            if line[2] == "in":
+            if line[2] == "in" or line[2] == None:
                 sessions.append(line[0])
 
-        # TODO > INDENTED CORRECTLY? (INDENTED 5 LINES)
         data = {
                 'id': idarg,
                 'tara': tara,
                 'sessions': sessions
         }
 
-        # TODO > INDENTED CORRECTLY?
         result = json.dumps(data)
+        # result = line[3]
 
-    # TODO > INDENTED CORRECTLY?
     else:
         result = abort(404)
 
@@ -306,7 +326,7 @@ def session(id):
             print("Getting session values (for 'in' or 'none' session type)")
             row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
         else:
-            return "Session ID not found (404)", status.HTTP_404_NOT_FOUND
+            return "Session ID not found (404)", 404
 
     json_data = []
     for result in results:
@@ -369,7 +389,7 @@ def weight():
             if in_or_out[0][1] == 'in':
                 # in after none
                 print("'none' after 'in' not allowed (400)")
-                return "'none' after 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "'none' after 'in' not allowed (400)", 400
             else:
                 print("'none' - normal")
                 run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
@@ -392,7 +412,7 @@ def weight():
                     return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
                 else:
                     print("'in' after 'in' without force not allowed (400)")
-                    return "'in' after 'in' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
+                    return "'in' after 'in' without force not allowed (400)", 400
 
             elif in_or_out[0][1] == 'out':
                 # in after out
@@ -414,7 +434,7 @@ def weight():
 
             else:
                 print("Operation unknown - not allowed (400)")
-                return "Operation unknown - not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "Operation unknown - not allowed (400)", 400
 
 
         if direction == 'out':
@@ -454,11 +474,11 @@ def weight():
             elif in_or_out[0][1] == 'out' and force != 'true':
                 # out after out ... not forced
                 print("'out' after 'out' without force not allowed (400)")
-                return "'out' after 'out' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "'out' after 'out' without force not allowed (400)", 400
 
             else:
                 print("'out' without 'in' not allowed (400)")
-                return "'out' without 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+                return "'out' without 'in' not allowed (400)", 400
 
 
 if __name__ == "__main__":

@@ -4,22 +4,22 @@ import pymysql
 import pymysql.cursors
 from flask import Flask
 import urllib
-import json 
+import json
 from flask import send_file
 import csv
 
-
 app = Flask(__name__)
 
-# CONSTS
-HOST = "0.0.0.0"
+# Consts
+HOST = 'mysql-db'
+#HOST = '0.0.0.0'
 
 
 @app.route('/health')
 def health():
-	if checkDBConnection() == 1:
-		return "Payment team is OK"
-	return "No Database Connection", 410
+    if checkDBConnection() == 1:
+        return "Payment team is OK"
+    return "No Database Connection", 410
 
 
 @app.route('/provider/<name>', methods=['POST'])
@@ -46,15 +46,15 @@ def updateProvider(id, name):
 
 @app.route('/rates', methods=['GET'])
 def rates():
-	return getRateFile()
+    return getRateFile()
 
 
 @app.route('/rates', methods=['POST'])
 def getRates():
-	query = "DELETE FROM Rates;"
-	runQuery(query) 
-	insertNewRates()
-	return 'Rates Are Up To Date'
+    query = "DELETE FROM Rates;"
+    runQuery(query)
+    insertNewRates()
+    return 'Rates Are Up To Date'
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['POST'])
@@ -93,16 +93,22 @@ def bill(providerId):
     # Establish connection
     connection = getConnection()
 
-    # Get trucks by provider id
-    query = "SELECT id FROM Trucks WHERE provider_id=%s;"
     try:
         with connection.cursor() as cursor:
+            # Get provider name
+            query = "SELECT name FROM Provider WHERE id=%s;"
             cursor.execute(query, (str(providerId)), )
-            result = cursor.fetchall()
-            for row in result:
+            result = cursor.fetchone()
+            providerName = result['name']
+
+            # Get provider trucks
+            query = "SELECT id FROM Trucks WHERE provider_id=%s;"
+            cursor.execute(query, (str(providerId)), )
+            truckRows = cursor.fetchall()
+            for truckRow in truckRows:
                 truckCount += 1  # count trucks
-                truck = row['id']
-                # truckData = getTruck(truck) TODO from weight team
+                truck = truckRow['id']
+                # truckStr = getTruck(truck) TODO from weight team
                 truckStr = '{"id":1234, "tara":85000, "sessions":[10]}'  # Get truck data from API
                 truckData = json.loads(truckStr)  # Convert to json object
                 sessions = truckData['sessions']
@@ -110,27 +116,45 @@ def bill(providerId):
                 for sessionId in sessions:
                     # sessionUrl = "http://green.develeap.com:8081/session/%s" % str(id) TODO from weight team
                     # sessionStr = urllib.request.urlopen(sessionUrl) TODO from weight team
-                    sessionStr = '{"id":10, "truck":1, "bruto":70000, "truckTara":85000, "produce":"tomato", "neto":60000}'  # Get session data
+                    sessionStr = '{"id":10, "truck":"134-33-443", "bruto":70000, "truckTara":85000, "produce":"Blood", "neto":60000}'  # Get session data
                     sessionData = json.loads(sessionStr)  # Convert to json object
+
+                    # Initialize produce in products table
+                    if products.get(sessionData['produce']) is None:
+                        products[sessionData['produce']] = {}
 
                     products[sessionData['produce']]['produce'] = sessionData['produce']  # Set product name
 
                     # Set accumulation of product sessions count
-                    if products[sessionData['produce']]['count']:
+                    if products[sessionData['produce']].get('count'):
                         products[sessionData['produce']]['count'] += 1
                     else:
                         products[sessionData['produce']]['count'] = 1
 
                     # Set accumulation of product neto tara amount
-                    if products[sessionData['produce']]['amount']:
+                    if products[sessionData['produce']].get('amount'):
                         products[sessionData['produce']]['amount'] += sessionData['neto']
                     else:
                         products[sessionData['produce']]['amount'] = sessionData['neto']
 
-                    # products[sessionData['produce']]['rate'] TODO bring from table of rates by provider id and produce
+                    # Get provider rate
+                    query = "select rate,scope from Rates where scope in ('All',%s) and product_id=%s;"
+                    cursor.execute(query, (str(providerId), sessionData['produce']), )
+                    rateRows = cursor.fetchall()
+                    rate, rateAll = 0, 0
+                    for rateRow in rateRows:
+                        if [[rateRow['scope'] == str(providerId)]]:
+                            rate = rateRow['rate']
+                            print(rate)
+                            break;
+                        else:
+                            rateAll = rateRow['rate']
+                    if not rate:
+                        rate = rateAll
+                    products[sessionData['produce']]['rate'] = rate
 
                     # Calc pay from rate and amount and accumulate product pay
-                    if products[sessionData['produce']]['pay']:
+                    if products[sessionData['produce']].get('pay'):
                         products[sessionData['produce']]['pay'] += products[sessionData['produce']]['amount'] * \
                                                                    products[sessionData['produce']]['rate']
                     else:
@@ -146,7 +170,7 @@ def bill(providerId):
     # Build final data object
     data = {
         "id": "%s" % providerId,
-        "name": "",  # TODO take from table of providers by provider id
+        "name": "%s" % providerName,
         "from": "%s" % t1,
         "to": "%s" % t2,
         "truckCount": "%d" % truckCount,
@@ -155,10 +179,9 @@ def bill(providerId):
         "total": "%s" % str(totalPay)
     }
     # Add data object products array accumulated before
-    for product in products:
-        data['products'].append(product)
+    for produce, produceData in products.items():
+        data['products'].append(produceData)
     return json.dumps(data)
-    return "OK"
 
 
 # local functions
@@ -177,7 +200,7 @@ def checkDBConnection():
 
 
 def getConnection():
-    return pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
+    return pymysql.connect(host=HOST, port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
 
 
@@ -195,37 +218,37 @@ def runQuery(query):
 
 
 def getRateFile():
-	try:
-		return send_file('/in/rates.csv', attachment_filename='rates.csv')
-	except Exception as e:
-		print(str(e))
-		return "File Not Found", 415
+    try:
+        return send_file('/in/rates.csv', attachment_filename='rates.csv')
+    except Exception as e:
+        print(str(e))
+        return "File Not Found", 415
 
 
 def insertNewRates():
-	filename = "/in/rates.csv"
-	# filename = "rates.csv"
+    filename = "/in/rates.csv"
+    # filename = "rates.csv"
 
-	query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
+    query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
 
-	with open(filename) as csv_file:
-		csv_reader = csv.reader(csv_file, delimiter=',')
-		line_count = 0
+    with open(filename) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
 
-		for row in csv_reader:
-			if line_count == 0:
-				print('Column names are ' + ", ".join(row))
-			elif line_count == 1:
-				query += '(\'' + row[0] + '\',' + row[1] + ',\'' +  row[2] + '\')'
-			else:
-				query += ', (\'' + row[0] + '\',' + row[1] + ',\'' +  row[2] + '\')'
-			line_count += 1
-		if line_count > 1:
-			query += ';';
-			print('Query is: ' + query)
-			runQuery(query)
+        for row in csv_reader:
+            if line_count == 0:
+                print('Column names are ' + ", ".join(row))
+            elif line_count == 1:
+                query += '(\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
+            else:
+                query += ', (\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
+            line_count += 1
+        if line_count > 1:
+            query += ';';
+            print('Query is: ' + query)
+            runQuery(query)
 
-	print('Processed ' + str(line_count - 1) + ' lines.')
+    print('Processed ' + str(line_count - 1) + ' lines.')
 
 
 def createJsonResponse():
