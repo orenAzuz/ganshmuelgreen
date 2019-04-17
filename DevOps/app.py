@@ -6,6 +6,7 @@ import requests
 import subprocess
 import datetime
 import json
+import time
 #PORT = 8000
 
 from flask_mail import Mail, Message
@@ -40,6 +41,7 @@ def api_health():
 @app.route("/reload",methods=['POST'])
 def api_reload():
     subprocess.call(['./reload.sh'])
+    time.sleep(200)
     data = json.loads(json.dumps(request.get_json()))
     commits = data["commits"]
     id = commits[0]
@@ -87,10 +89,11 @@ def http_request(port):
     except requests.exceptions.RequestException:
         return 111
 
-
+@app.route("/test")
 def test():
     url = "http://18.222.236.224:8081/health"
-    return null
+    print(requests.get(url))
+    return requests.get(url)
 
 
 def post_weight():
