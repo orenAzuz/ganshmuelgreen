@@ -16,10 +16,10 @@ import datetime
 app = Flask(__name__)
 
 
-def connect_or_reconnect_db(mydb=None):
+def connect_or_reconnect_db(mydb):
     # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
     # some functionality requires a more persistent connection - not repeated connect/disconnect cycles
-    if mydb == None or not mydb.is_connected():
+    if not mydb.is_connected():
         mydb = mysql.connector.connect(
             host=os.environ['DB_HOST'],
             user="root",
@@ -173,7 +173,7 @@ def batch_weight(file):
     )
 
     sqlcursor = mydb.cursor()
-#no
+
     if file in os.listdir("in/"):
         if file.lower().endswith(('.csv')):
             new_batch = open("in/"+file)
@@ -329,7 +329,7 @@ def session(id):
 
     sql_cursor = mydb.cursor()
 
-    sql_cursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " +
+    sql_cursor.execute("SELECT id, truck, bruto, truckTara, neto, produce FROM transactions WHERE id = " +
                       id + " AND direction = 'out'")
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
@@ -337,7 +337,7 @@ def session(id):
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
 
     else:
-        sql_cursor.execute("SELECT id, truck, bruto FROM transactions WHERE id = " + id)
+        sql_cursor.execute("SELECT id, truck, bruto, produce FROM transactions WHERE id = " + id)
         results = sql_cursor.fetchall()
         if sql_cursor.rowcount > 0:
             print("Getting session values (for 'in' or 'none' session type)")
@@ -399,9 +399,17 @@ def weight():
         else:
             return "Invalid unit - 'kg' or 'lbs' required (400)", 400
 
+        mydb = mysql.connector.connect(
+            host=os.environ['DB_HOST'],
+            user="root",
+            passwd="greengo",
+            database="weight",
+            auth_plugin='mysql_native_password'
+        )
+
         # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
         # some functionality requires a more persistent connection - not repeated connect/disconnect cycles
-        mydb = connect_or_reconnect_db()
+        mydb = connect_or_reconnect_db(mydb)
 
         if direction == 'none':
             in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
