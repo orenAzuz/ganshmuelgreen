@@ -39,7 +39,7 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
-    subprocess.call(['./reload.sh'])
+    subprocess.check_call(['./reload.sh'])
     data = json.loads(json.dumps(request.get_json()))
     commits = data["commits"]
     id = commits[0]
