@@ -5,6 +5,7 @@ from flask_mail import Mail, Message
 import requests
 import subprocess
 import datetime
+import json
 #PORT = 8000
 
 from flask_mail import Mail, Message
@@ -38,47 +39,54 @@ def api_health():
 
 @app.route("/reload",methods=['POST'])
 def api_reload():
-	print('request.get_data : ',request.get_json())
-	print('request.query_string : ',request.query_string)
-	subprocess.call(['./reload.sh'])
-	mestxt = "New deploy from git. branch -> master. "
-	send_mail(mestxt)
-	return render_template('index.html',message=mestxt)
+    subprocess.call(['./reload.sh'])
+    data = json.loads(json.dumps(request.get_json()))
+    commits = data["commits"]
+    id = commits[0]
+    committer = id["committer"]
+    name = committer["name"]
+    email = committer["email"]
+    mestxt = "New deploy from git. branch -> master. "
+    send_mail(mestxt,name ,email)
+    return render_template('index.html',message=mestxt)
 
 
-def send_mail(message):
-	weight_status = http_request(8081)
-	billing_status = http_request(8080)
-	today = datetime.datetime.now()
-	today_now = "{:%Y-%m-%d %H:%M:%S}".format(today)
-	status = (weight_status, billing_status, today_now)
-	body_txt = 'The status for weight is: %s .\n The status for billing is %s . \n%s' % status
-	msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
-	msg.body = body_txt
-	mail.send(msg)
-	return 'done'
+def send_mail(message, name ,email):
+    weight_status = http_request(8081)
+    billing_status = http_request(8080)
+    today = datetime.datetime.now()
+    today_now = "{:%Y-%m-%d %H:%M:%S}".format(today)
+    status = (weight_status, billing_status, today_now, name, email)
+    body_txt = 'The status code for weight is: %s .\n' \
+               'The status code for billing is: %s . ' \
+               '\n%s \nModifyed by: %s .\nEmail: %s' % status
+    print(body_txt)
+    msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
+    msg.body = body_txt
+    mail.send(msg)
+    return 'done'
 
 
 def get_mail_list():
-	return ['orezaz@gmail.com',
-		    'yaniv.d@develeap.com',
-			'nirdod@gmail.com',
-			'giuliovnturi@gmail.com',
-			'ilana.fisher.il@gmail.com',
-			'razleshem3@gmail.com',
-			'br.cohen@hotmail.fr',
-			'emanaz.91@gmail.com',
-			'sharontabakman@gmail.com',
-			'stacnospam@gmail.com']
+    return ['orezaz@gmail.com',
+            'yaniv.d@develeap.com',
+            'nirdod@gmail.com',
+            'giuliovnturi@gmail.com',
+            'ilana.fisher.il@gmail.com',
+            'razleshem3@gmail.com',
+            'br.cohen@hotmail.fr',
+            'emanaz.91@gmail.com',
+            'sharontabakman@gmail.com',
+            'stacnospam@gmail.com']
 
 
 def http_request(port):
-	url = "http://green.develeap.com:%s/health" % port
-	try:
-		r = requests.get(url)
-		return r.status_code
-	except requests.exceptions.RequestException:
-		return 111
+    url = "http://green.develeap.com:%s/health" % port
+    try:
+        r = requests.get(url)
+        return r.status_code
+    except requests.exceptions.RequestException:
+        return 111
 
 
 if __name__ == "__main__":
