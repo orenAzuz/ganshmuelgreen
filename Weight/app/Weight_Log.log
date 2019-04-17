@@ -1,0 +1,248 @@
+2019-04-17 14:30:36,583:WARNING: * Debugger is active!
+2019-04-17 14:30:36,584:INFO: * Debugger PIN: 145-406-187
+2019-04-17 14:34:48,081:INFO:192.168.112.1 - - [17/Apr/2019 14:34:48] "GET /item/A10002?from=&to HTTP/1.1" 200 -
+2019-04-17 14:34:48,194:INFO:192.168.112.1 - - [17/Apr/2019 14:34:48] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:34:51,423:INFO:192.168.112.1 - - [17/Apr/2019 14:34:51] "GET /item/A10002?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:34:51,510:INFO:192.168.112.1 - - [17/Apr/2019 14:34:51] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:46:51,096:INFO:192.168.112.1 - - [17/Apr/2019 14:46:51] "POST /item HTTP/1.1" 404 -
+2019-04-17 14:47:54,316:INFO:192.168.112.1 - - [17/Apr/2019 14:47:54] "POST /item HTTP/1.1" 404 -
+2019-04-17 14:48:08,930:INFO:192.168.112.1 - - [17/Apr/2019 14:48:08] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:48:09,028:INFO:192.168.112.1 - - [17/Apr/2019 14:48:09] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:48:13,208:INFO:192.168.112.1 - - [17/Apr/2019 14:48:13] "GET /item/A10002?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:48:13,302:INFO:192.168.112.1 - - [17/Apr/2019 14:48:13] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:48:53,157:INFO:192.168.112.1 - - [17/Apr/2019 14:48:53] "POST /item/ HTTP/1.1" 404 -
+2019-04-17 14:50:52,050:INFO:192.168.112.1 - - [17/Apr/2019 14:50:52] "POST /item/ HTTP/1.1" 404 -
+2019-04-17 14:51:16,073:INFO:192.168.112.1 - - [17/Apr/2019 14:51:16] "POST /item/ HTTP/1.1" 404 -
+2019-04-17 14:51:25,248:INFO:192.168.112.1 - - [17/Apr/2019 14:51:25] "POST /item/ HTTP/1.1" 404 -
+2019-04-17 14:51:37,387:INFO:192.168.112.1 - - [17/Apr/2019 14:51:37] "GET /item/ HTTP/1.1" 404 -
+2019-04-17 14:51:43,812:INFO:192.168.112.1 - - [17/Apr/2019 14:51:43] "GET /health HTTP/1.1" 200 -
+2019-04-17 14:52:00,108:INFO:192.168.112.1 - - [17/Apr/2019 14:52:00] "POST / HTTP/1.1" 405 -
+2019-04-17 14:53:07,597:INFO:192.168.112.1 - - [17/Apr/2019 14:53:07] "GET /item/ HTTP/1.1" 404 -
+2019-04-17 14:53:24,209:INFO:192.168.112.1 - - [17/Apr/2019 14:53:24] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:53:24,300:INFO:192.168.112.1 - - [17/Apr/2019 14:53:24] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:53:59,627:INFO:192.168.112.1 - - [17/Apr/2019 14:53:59] "GET /item/A10005?from= HTTP/1.1" 200 -
+2019-04-17 14:54:31,245:INFO:192.168.112.1 - - [17/Apr/2019 14:54:31] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:54:32,921:INFO:192.168.112.1 - - [17/Apr/2019 14:54:32] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:55:02,662:INFO:192.168.112.1 - - [17/Apr/2019 14:55:02] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:55:02,717:ERROR:Not found correct setion for id: A10005
+2019-04-17 14:55:02,718:INFO:192.168.112.1 - - [17/Apr/2019 14:55:02] "GET /item/A10005?from=20190416130442&to= HTTP/1.1" 404 -
+2019-04-17 14:55:02,773:ERROR:Not found correct setion for id: 2012
+2019-04-17 14:55:02,774:INFO:192.168.112.1 - - [17/Apr/2019 14:55:02] "GET /item/2012?from=&to= HTTP/1.1" 404 -
+2019-04-17 14:55:02,828:ERROR:Not found correct setion for id: 2012
+2019-04-17 14:55:02,830:INFO:192.168.112.1 - - [17/Apr/2019 14:55:02] "GET /item/2012?from=&to= HTTP/1.1" 404 -
+2019-04-17 14:55:22,305:ERROR:Not found correct setion for id: 2012
+2019-04-17 14:55:22,307:INFO:192.168.112.1 - - [17/Apr/2019 14:55:22] "GET /item/2012?from=&to= HTTP/1.1" 404 -
+2019-04-17 14:55:22,384:INFO:192.168.112.1 - - [17/Apr/2019 14:55:22] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:55:26,323:INFO:192.168.112.1 - - [17/Apr/2019 14:55:26] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:55:26,397:INFO:192.168.112.1 - - [17/Apr/2019 14:55:26] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 14:55:44,796:INFO:192.168.112.1 - - [17/Apr/2019 14:55:44] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:55:44,852:ERROR:Not found correct setion for id: A10005
+2019-04-17 14:55:44,853:INFO:192.168.112.1 - - [17/Apr/2019 14:55:44] "GET /item/A10005?from=20190416130442&to= HTTP/1.1" 404 -
+2019-04-17 14:55:44,910:INFO:192.168.112.1 - - [17/Apr/2019 14:55:44] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:55:44,966:ERROR:Not found correct setion for id: 2012
+2019-04-17 14:55:44,968:INFO:192.168.112.1 - - [17/Apr/2019 14:55:44] "GET /item/2012?from=&to= HTTP/1.1" 404 -
+2019-04-17 14:56:00,740:INFO:192.168.112.1 - - [17/Apr/2019 14:56:00] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:56:00,795:ERROR:Not found correct setion for id: A10005
+2019-04-17 14:56:00,796:INFO:192.168.112.1 - - [17/Apr/2019 14:56:00] "GET /item/A10005?from=20190416130442&to= HTTP/1.1" 404 -
+2019-04-17 14:56:00,853:INFO:192.168.112.1 - - [17/Apr/2019 14:56:00] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:56:00,910:INFO:192.168.112.1 - - [17/Apr/2019 14:56:00] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:56:24,204:INFO:192.168.112.1 - - [17/Apr/2019 14:56:24] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:56:24,261:ERROR:Not found correct setion for id: A10005
+2019-04-17 14:56:24,263:INFO:192.168.112.1 - - [17/Apr/2019 14:56:24] "GET /item/A10005?from=20190416130442&to= HTTP/1.1" 404 -
+2019-04-17 14:56:24,318:INFO:192.168.112.1 - - [17/Apr/2019 14:56:24] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:56:24,375:INFO:192.168.112.1 - - [17/Apr/2019 14:56:24] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:57:57,170:INFO:192.168.112.1 - - [17/Apr/2019 14:57:57] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:57:57,225:ERROR:Not found correct setion for id: A10005
+2019-04-17 14:57:57,227:INFO:192.168.112.1 - - [17/Apr/2019 14:57:57] "GET /item/A10005?from=20190416130442&to= HTTP/1.1" 404 -
+2019-04-17 14:57:57,284:INFO:192.168.112.1 - - [17/Apr/2019 14:57:57] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:57:57,340:ERROR:Not found correct setion for id: 2030
+2019-04-17 14:57:57,341:INFO:192.168.112.1 - - [17/Apr/2019 14:57:57] "GET /item/2030?from=20190101130442&to=20190228130442 HTTP/1.1" 404 -
+2019-04-17 14:58:15,361:INFO:192.168.112.1 - - [17/Apr/2019 14:58:15] "GET /item/A10005?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:58:15,416:ERROR:Not found correct setion for id: A10005
+2019-04-17 14:58:15,417:INFO:192.168.112.1 - - [17/Apr/2019 14:58:15] "GET /item/A10005?from=20190416130442&to= HTTP/1.1" 404 -
+2019-04-17 14:58:15,473:INFO:192.168.112.1 - - [17/Apr/2019 14:58:15] "GET /item/2030?from=&to= HTTP/1.1" 200 -
+2019-04-17 14:58:15,527:ERROR:Not found correct setion for id: 2030
+2019-04-17 14:58:15,528:INFO:192.168.112.1 - - [17/Apr/2019 14:58:15] "GET /item/2030?from=20190101130442&to=20190228130442 HTTP/1.1" 404 -
+2019-04-17 15:00:48,011:INFO: * Detected change in '/app/app.py', reloading
+2019-04-17 15:00:49,331:WARNING: * Debugger is active!
+2019-04-17 15:00:49,339:INFO: * Debugger PIN: 145-406-187
+2019-04-17 15:03:26,036:INFO: * Detected change in '/app/app.py', reloading
+2019-04-17 15:03:27,345:WARNING: * Debugger is active!
+2019-04-17 15:03:27,346:INFO: * Debugger PIN: 145-406-187
+2019-04-17 18:05:29,992:ERROR:mysql connector IntegrityError error
+2019-04-17 18:05:29,994:ERROR:mysql connector IntegrityError error
+2019-04-17 18:05:29,995:ERROR:mysql connector IntegrityError error
+2019-04-17 15:09:16,910:INFO: * Running on http://0.0.0.0:8000/ (Press CTRL+C to quit)
+2019-04-17 15:09:16,914:INFO: * Restarting with stat
+2019-04-17 15:09:19,434:WARNING: * Debugger is active!
+2019-04-17 15:09:19,497:INFO: * Debugger PIN: 344-965-058
+2019-04-17 15:12:07,634:INFO:192.168.128.1 - - [17/Apr/2019 15:12:07] "POST /batch-weight/A10005 HTTP/1.1" 200 -
+2019-04-17 15:12:27,904:INFO:192.168.128.1 - - [17/Apr/2019 15:12:27] "POST /batch-weight/A10005 HTTP/1.1" 200 -
+2019-04-17 15:12:44,380:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,382:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,383:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,384:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,385:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,387:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,388:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,389:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,390:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,391:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,392:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,393:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,394:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,395:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,396:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,397:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,398:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,400:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,401:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,402:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,403:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,404:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,405:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,406:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,407:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,408:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,409:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,410:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,411:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,412:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,413:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,414:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,415:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,416:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,417:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,418:ERROR:mysql connector IntegrityError error
+2019-04-17 15:12:44,419:INFO:192.168.128.1 - - [17/Apr/2019 15:12:44] "POST /batch-weight/containers1.csv HTTP/1.1" 200 -
+2019-04-17 15:13:40,808:INFO:192.168.128.1 - - [17/Apr/2019 15:13:40] "GET /batch-weight/containers1.csv HTTP/1.1" 405 -
+2019-04-17 15:13:40,911:INFO:192.168.128.1 - - [17/Apr/2019 15:13:40] "GET /favicon.ico HTTP/1.1" 404 -
+2019-04-17 15:13:54,404:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,406:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,407:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,409:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,410:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,412:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,413:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,415:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,416:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,417:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,418:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,420:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,421:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,422:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,423:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,424:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,425:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,427:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,428:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,429:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,430:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,432:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,433:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,434:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,435:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,436:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,437:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,438:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,440:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,441:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,442:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,443:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,445:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,446:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,448:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,449:ERROR:mysql connector IntegrityError error
+2019-04-17 15:13:54,451:INFO:192.168.128.1 - - [17/Apr/2019 15:13:54] "POST /batch-weight/containers1.csv HTTP/1.1" 200 -
+2019-04-17 15:14:32,300:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:32,301:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:32,303:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:33,294:INFO:192.168.128.1 - - [17/Apr/2019 15:14:33] "POST /batch-weight/containers2.csv HTTP/1.1" 200 -
+2019-04-17 15:14:37,271:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,273:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,275:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,276:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,278:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,280:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,282:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,284:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,286:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,287:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,289:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,291:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,292:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,294:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,296:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,298:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,299:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,301:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,302:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,303:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,304:ERROR:mysql connector IntegrityError error
+2019-04-17 15:14:37,306:INFO:192.168.128.1 - - [17/Apr/2019 15:14:37] "POST /batch-weight/containers2.csv HTTP/1.1" 200 -
+2019-04-17 15:16:48,930:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,931:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,933:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,934:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,935:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,936:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,937:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,938:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,939:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,940:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,941:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,942:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,944:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,945:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,946:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,947:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,948:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,949:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,950:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,951:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,952:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,953:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,954:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,955:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,956:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,957:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,958:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,959:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,960:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,961:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,962:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,963:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,964:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,965:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,966:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,967:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:48,969:INFO:192.168.128.1 - - [17/Apr/2019 15:16:48] "POST /batch-weight/containers1.csv HTTP/1.1" 200 -
+2019-04-17 15:16:49,021:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,022:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,024:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,025:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,026:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,027:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,028:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,029:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,030:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,031:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,032:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,034:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,035:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,036:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,038:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,039:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,041:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,042:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,044:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,045:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,046:ERROR:mysql connector IntegrityError error
+2019-04-17 15:16:49,048:INFO:192.168.128.1 - - [17/Apr/2019 15:16:49] "POST /batch-weight/containers2.csv HTTP/1.1" 200 -
+2019-04-17 15:16:50,363:INFO:192.168.128.1 - - [17/Apr/2019 15:16:50] "POST /batch-weight/containers3.json HTTP/1.1" 200 -
+2019-04-17 15:18:24,666:INFO: * Detected change in '/app/app.py', reloading
+2019-04-17 15:18:24,793:INFO: * Restarting with stat
+2019-04-17 15:18:26,240:WARNING: * Debugger is active!
+2019-04-17 15:18:26,254:INFO: * Debugger PIN: 344-965-058
+2019-04-17 15:18:28,334:INFO:192.168.128.1 - - [17/Apr/2019 15:18:28] "GET /batch-weight/containds1.csv HTTP/1.1" 405 -
+2019-04-17 15:18:28,432:INFO:192.168.128.1 - - [17/Apr/2019 15:18:28] "GET /favicon.ico HTTP/1.1" 404 -
