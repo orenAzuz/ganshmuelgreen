@@ -89,6 +89,13 @@ def http_request(port):
         return 111
 
 
+def test():
+    return null
+
+
+def post_weight():
+    json_string = ""
+
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
 	app.run(host=HOST,debug=True)
