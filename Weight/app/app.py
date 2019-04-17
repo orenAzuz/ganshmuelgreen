@@ -16,17 +16,22 @@ import datetime
 app = Flask(__name__)
 
 
-def connect_db():
-    mydb = mysql.connector.connect(
-        host=os.environ['DB_HOST'],
-        user="root",
-        passwd="greengo",
-        database="weight",
-        auth_plugin='mysql_native_password'
-    )
+def connect_or_reconnect_db(mydb=None):
+    # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
+    # some functionality requires a more persistent connection - not repeated connect/disconnect cycles
+    if mydb == None or not mydb.is_connected():
+        mydb = mysql.connector.connect(
+            host=os.environ['DB_HOST'],
+            user="root",
+            passwd="greengo",
+            database="weight",
+            auth_plugin='mysql_native_password'
+        )
     return mydb
 
 def run_select(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
@@ -34,6 +39,8 @@ def run_select(mydb, sql):
 
 
 def run_select_json(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
@@ -45,6 +52,8 @@ def run_select_json(mydb, sql):
 
 
 def run_select_one_value(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
@@ -55,6 +64,8 @@ def run_select_one_value(mydb, sql):
 
 
 def run_insert(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     mydb.commit()
@@ -62,16 +73,20 @@ def run_insert(mydb, sql):
 
 
 def run_update(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     mydb.commit()
     print("Record updated successfully")
 
 
-def weight_json_in_or_none(mydb, last_insert_id):
+def weight_json_in_or_none(mydb, session_id):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
 
-    sql_cursor.execute("SELECT id, truck, bruto FROM transactions WHERE id = " + str(last_insert_id))
+    sql_cursor.execute("SELECT id, truck, bruto FROM transactions WHERE id = " + str(session_id))
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
         print("Getting session values (not for 'in' or 'none' session type)")
@@ -89,11 +104,13 @@ def weight_json_in_or_none(mydb, last_insert_id):
     return json.dumps(json_data)[1:][:-1] # strip first and last character
 
 
-def weight_json_out(mydb, truck_previous_session_id):
+def weight_json_out(mydb, session_id):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
 
     sql_cursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " +
-                       str(truck_previous_session_id) + " AND direction = 'out'")
+                       str(session_id) + " AND direction = 'out'")
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
         print("Getting session values (not for 'out' session type)")
@@ -376,28 +393,35 @@ def weight():
         produce = request.form.get('produce')
 
         if unit == "lbs":
-            weight_kg = weight * 2.205
-        else:
+            weight_kg = int(weight) * 2.205
+        elif unit == "kg":
             weight_kg = int(weight)
+        else:
+            return "Invalid unit - 'kg' or 'lbs' required (400)", 400
 
-        mydb = connect_db()
+        # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
+        # some functionality requires a more persistent connection - not repeated connect/disconnect cycles
+        mydb = connect_or_reconnect_db()
 
         if direction == 'none':
-            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
 
-            if in_or_out[0][1] == 'in':
+            if len(in_or_out) > 0 and in_or_out[0][1] == 'in':
                 # in after none
                 print("'none' after 'in' not allowed (400)")
                 return "'none' after 'in' not allowed (400)", 400
             else:
                 print("'none' - normal")
-                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
-                           "'" + direction + "', '" + truck + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, containers, bruto, produce) VALUES (now(), " \
+                           "'" + direction + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
                 return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
         if direction == 'in':
-            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+            if not truck:
+                return "Required 'truck' value not supplied (400)", 400
+
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
 
             if in_or_out[0][1] == 'in':
@@ -409,7 +433,10 @@ def weight():
                     run_update(mydb, "UPDATE transactions SET bruto = "+str(weight_kg)+" "
                                "WHERE id = "+str(truck_previous_session_id))
                     # return info - only for in
-                    return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+                    return weight_json_in_or_none(mydb, truck_previous_session_id)
+                elif in_or_out[0][1] == 'none':
+                    print("'in' after 'none' not allowed (400)")
+                    return "'in' after 'none' not allowed (400)", 400
                 else:
                     print("'in' after 'in' without force not allowed (400)")
                     return "'in' after 'in' without force not allowed (400)", 400
@@ -438,6 +465,9 @@ def weight():
 
 
         if direction == 'out':
+            if not truck:
+                return "Required 'truck' value not supplied (400)", 400
+
             in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
 
