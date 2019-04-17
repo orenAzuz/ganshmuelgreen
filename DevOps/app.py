@@ -47,8 +47,7 @@ def api_reload():
     name = committer["name"]
     email = committer["email"]
     mestxt = "New deploy from git. branch -> master. "
-    send_mail(mestxt,name ,email)
-    return render_template('index.html',message=mestxt)
+    return send_mail(mestxt,name ,email)
 
 
 def send_mail(message, name ,email):
@@ -64,7 +63,7 @@ def send_mail(message, name ,email):
     msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
     msg.body = body_txt
     mail.send(msg)
-    return 'done'
+    return render_template('index.html',message=mestxt)
 
 
 def get_mail_list():
@@ -90,11 +89,13 @@ def http_request(port):
 
 
 def test():
+    url = "http://18.222.236.224:8081/health"
     return null
 
 
 def post_weight():
     json_string = ""
+    res = requests.post('http://18.222.236.224:8081/weight', data=json_string)
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
