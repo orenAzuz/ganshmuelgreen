@@ -92,13 +92,16 @@ def http_request(port):
 @app.route("/test")
 def test():
     url = "http://18.222.236.224:8081/health"
-    print(requests.get(url))
-    return requests.get(url)
+
+    return post_weight()
 
 
 def post_weight():
-    json_string = ""
-    res = requests.post('http://18.222.236.224:8081/weight', data=json_string)
+    "=&=&=,,&=&=&="
+    json_string = {"truck": "A10202", "force": "true", "containers" :[ "C-35434" , "K-8263","K-7943"],
+                   "weight":"2000","unit":"kg","produce":"oranges"}
+    return requests.post('http://18.222.236.224:8081/weight', data=json_string)
+
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
