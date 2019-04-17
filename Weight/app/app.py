@@ -171,6 +171,7 @@ def batch_weight(file):
                 try:
                     # insert to table containers_registered id, weight and unit
                     sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                    mydb.commit()
                     results+= container_id + " " + weight + " " + unit + "<br>"
                 except mysql.connector.IntegrityError:
                     pass
@@ -187,6 +188,7 @@ def batch_weight(file):
                 try:
                     # insert to table containers_registered id, weight and unit
                     sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                    mydb.commit()
                     results+= container_id + " " + str(weight) + " " + unit + "<br>"
                 except mysql.connector.IntegrityError:
                     pass 
@@ -232,7 +234,7 @@ def item(idarg):
     now = datetime.datetime.now()
     t1 = now.strftime("%Y%m0100000")
     t2 = now.strftime("%Y%m%d%H%M%S")[:-1]
-    arg1 = idarg
+
     arg1 = request.args.get("from")
     arg2 = request.args.get("to")
 
@@ -240,11 +242,13 @@ def item(idarg):
         if arg1.isdigit() and len(arg1) == 13:
             t1 = arg1
     if arg2:
-        if date_frmt.match(arg2) and len(arg2) == 13:
+        if arg2.isdigit() and len(arg2) == 13:
             t2 = arg2
 
 
     sqlcursor = mydb.cursor()
+
+    
 
     sqlcursor.execute("SELECT id, datetime, direction, truck, truckTara FROM transactions WHERE truck = %s AND datetime > %s AND datetime < %s", (idarg, t1, t2))
     query_result = sqlcursor.fetchall()
@@ -253,27 +257,43 @@ def item(idarg):
         sqlcursor.execute("SELECT id, datetime, direction, containers, truckTara FROM transactions WHERE containers like '%" + idarg + "%' AND datetime > %s AND datetime < %s", (t1, t2))
         query_result = sqlcursor.fetchall()
 
+        there_is_container = False
+
+        if query_result:
+            sessions = []
+            for line in query_result:
+                container_list = line[3].split(",")
+
+                for container in container_list:
+                    if idarg == container:
+                        if line[2] == "in" or line[2] == None:
+                            sessions.append(line[0])
+                            there_is_container = True
+
+                if there_is_container == False:
+                    query_result = None
+
+
     mydb.close()
 
 
     if query_result:
         tara = query_result[-1][4]
+
         sessions = []
         for line in query_result:
-            if line[2] == "in":
+            if line[2] == "in" or line[2] == None:
                 sessions.append(line[0])
 
-        # TODO > INDENTED CORRECTLY? (INDENTED 5 LINES)
         data = {
                 'id': idarg,
                 'tara': tara,
                 'sessions': sessions
         }
 
-        # TODO > INDENTED CORRECTLY?
         result = json.dumps(data)
+        # result = line[3]
 
-    # TODO > INDENTED CORRECTLY?
     else:
         result = abort(404)
 
