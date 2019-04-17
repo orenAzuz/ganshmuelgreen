@@ -384,7 +384,7 @@ def weight():
                 # in after in
                 if force == 'true':
                     print("in after in - force")
-                    truck_previous_session_id = test[0][0]
+                    truck_previous_session_id = in_or_out[0][0]
                     # overwrite bruto if forced
                     run_update(mydb, "UPDATE transactions SET bruto = "+str(weight_kg)+" "
                                "WHERE id = "+str(truck_previous_session_id))
