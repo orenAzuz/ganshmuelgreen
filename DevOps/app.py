@@ -106,7 +106,7 @@ def post_weight():
     return str(res.text)
 
 
-def get_weight(): 
+def get_weight():  
     return
 
 if __name__ == "__main__":
