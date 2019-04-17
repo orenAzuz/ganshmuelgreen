@@ -207,7 +207,7 @@ def unknown():
       auth_plugin='mysql_native_password'
     )
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT container_id from containers_registered where weight like NULL")
+    mycursor.execute("SELECT container_id from containers_registered where weight is NULL")
     result = mycursor.fetchall()
     ret = ""
     ret = '\n'.join(map(str, result))
