@@ -19,9 +19,9 @@ services:
     container_name: billsrv
     image: billsrvimg
     ports:
-          - 8082:8080
+          - 8080:8080
     build: 
-      context: ./app
+      context: ${GIT_HOME}/Provider_payment/app
       dockerfile: Dockerfile  
     networks:
       - shared

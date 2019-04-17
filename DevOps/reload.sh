@@ -6,6 +6,7 @@ git pull origin ${BRANCH}
 
 echo "Starting build containers ..."
 export LOGS=$GIT_HOME/DevOps/logs
+
 rm -f $LOGS/*
 mkdir $HOME/billdb
 chmod 777 $HOME/billdb
@@ -24,7 +25,7 @@ for i in $bill_compose $weigh_compose  ; do
 	docker-compose   --file "${i}" build --no-cache  && \
 	echo "Upload process says: docker-compose up ..." && \
 	docker-compose --file "${i}" up --force-recreate --remove-orphans &
-# 1> $LOGS/out.log 2>$LOGS/errors.log 
+#1> $LOGS/out.log 2>$LOGS/errors.log 
 done
 
 
