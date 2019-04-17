@@ -173,7 +173,7 @@ def batch_weight(file):
     )
 
     sqlcursor = mydb.cursor()
-
+#no
     if file in os.listdir("in/"):
         if file.lower().endswith(('.csv')):
             new_batch = open("in/"+file)
