@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `Provider` (
 ) ENGINE=MyISAM  AUTO_INCREMENT=10001 ;
 
 CREATE TABLE IF NOT EXISTS `Rates` (
-  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` varchar(50) NOT NULL,
   `rate` int(11) DEFAULT 0,
   `scope` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`product_id`),
@@ -35,11 +35,13 @@ CREATE TABLE IF NOT EXISTS `Trucks` (
 -- Dumping data
 --
 
+/*
 INSERT INTO Provider (`name`) VALUES ('ALL'), ('pro1'),
 (3, 'pro2');
 
-INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES (1, 2, 'ALL'),
+INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES ('1', 2, 'ALL'),
 (2, 4, 'pro1');
 
 INSERT INTO Trucks (`id`, `provider_id`) VALUES ('134-33-443', 2),
 ('222-33-111', 1);
+*/

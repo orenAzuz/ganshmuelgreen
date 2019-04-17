@@ -165,7 +165,8 @@ def bill(providerId):
 
 def checkDBConnection():
     try:
-        db = pymysql.connect(host="0.0.0.0", port=3306, user="root", passwd="greengo", db="billdb", auth_plugin_map="")
+        # db = pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", auth_plugin_map="")
+        db = getConnection()
     except Exception:
         print("Error in MySQL connection")
         return 0
@@ -176,7 +177,7 @@ def checkDBConnection():
 
 
 def getConnection():
-    return pymysql.connect(host="0.0.0.0", port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
+    return pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
 
 
@@ -215,9 +216,9 @@ def insertNewRates():
 			if line_count == 0:
 				print('Column names are ' + ", ".join(row))
 			elif line_count == 1:
-				query += '(' + row[0] + ',' + row[1] + ',\'' +  row[2] + '\')'
+				query += '(\'' + row[0] + '\',' + row[1] + ',\'' +  row[2] + '\')'
 			else:
-				query += ', (' + row[0] + ',' + row[1] + ',\'' +  row[2] + '\')'
+				query += ', (\'' + row[0] + '\',' + row[1] + ',\'' +  row[2] + '\')'
 			line_count += 1
 		if line_count > 1:
 			query += ';';
