@@ -81,13 +81,20 @@ def get_mail_list():
 
 
 def http_request(port):
-    url = "http://green.develeap.com:%s/health" % port
+    url = "http://18.222.236.224:%s/health" % port
     try:
         r = requests.get(url)
         return r.status_code
     except requests.exceptions.RequestException:
         return 111
 
+
+def test():
+    return null
+
+
+def post_weight():
+    json_string = ""
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
