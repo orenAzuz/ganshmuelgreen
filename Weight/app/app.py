@@ -11,7 +11,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask, request
 import datetime
-from flask_api import status
+#from flask_api import status
 
 app = Flask(__name__)
 
