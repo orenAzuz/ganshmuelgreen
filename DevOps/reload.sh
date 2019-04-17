@@ -5,12 +5,13 @@ git checkout ${BRANCH}
 git pull origin ${BRANCH}
 
 echo "Starting build containers ..."
-export LOGS=$GIT_HOME/DevOps/logs
+#export LOGS=$GIT_HOME/DevOps/logs
 
-rm -f $LOGS/*
+#rm -f $LOGS/*
+sudo rm -rf $HOME/billdb
 mkdir $HOME/billdb
 chmod 777 $HOME/billdb
-#rm -rf $GIT_HOME/Weight/mysql/datadir
+sudo rm -rf $GIT_HOME/Weight/mysql/datadir
 mkdir -p $GIT_HOME/Weight/mysql/datadir
 chmod 777 $GIT_HOME/Weight/mysql/datadir
 
