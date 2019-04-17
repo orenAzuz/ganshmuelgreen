@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from flask import Flask, request, abort
 import mysql.connector, time
 import json
-from __future__ import print_function
 import flask
 import json
 import logging
