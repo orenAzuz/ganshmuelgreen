@@ -264,18 +264,18 @@ def item(idarg):
 
 
     now = datetime.datetime.now()
-    t1 = now.strftime("%Y%m0100000")
-    t2 = now.strftime("%Y%m%d%H%M%S")[:-1]
+    t1 = now.strftime("%Y-%m-01 00:00:00")
+    t2 = now.strftime("%Y-%m-%d %H:%M:%S")
 
     arg1 = request.args.get("from")
     arg2 = request.args.get("to")
 
     if arg1:
-        if arg1.isdigit() and len(arg1) == 13:
-            t1 = arg1
+        if arg1.isdigit() and len(arg1) == 14:
+            t1 = f"{arg1[0:4]}-{arg1[4:6]}-{arg1[6:8]} {arg1[8:10]}:{arg1[10:12]}:{arg1[12:14]}"
     if arg2:
-        if arg2.isdigit() and len(arg2) == 13:
-            t2 = arg2
+        if arg2.isdigit() and len(arg2) == 14:
+            t2 = f"{arg2[0:4]}-{arg2[4:6]}-{arg2[6:8]} {arg2[8:10]}:{arg2[10:12]}:{arg2[12:14]}"
 
 
     sqlcursor = mydb.cursor()
