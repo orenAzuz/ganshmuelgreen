@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+#from __future__ import print_function
 from flask import Flask, request, abort
 import mysql.connector, time
 import json
-from __future__ import print_function
 import flask
 import json
 import logging
@@ -141,31 +141,6 @@ def health():
     except:
         return 'Failure', 500
 
-@app.route('/weight',methods = ['GET'])
-def weight():
-    mydb = mysql.connector.connect(
-      host="mysql-db",
-      user="root",
-      passwd="greengo",
-      database="weight",
-      auth_plugin='mysql_native_password'
-    )
-    tim = time.strftime("%Y%m%d%H%M%S", time.gmtime())
-    timt = time.strftime("%Y%m%d000000", time.gmtime())
-    t1 = request.args.get('from', default = timt)
-    t2 = request.args.get('to', default = tim)
-    f = request.args.get('filter', default = "'in','out','none'")
-    mycursor = mydb.cursor()
-    arg = mycursor.execute("SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN "+t1+" AND " +t2)
-    result = mycursor.fetchall()
-    json_data = []
-    row_headers = [val[0] for val in mycursor.description]
-    #json_data.append(dict(zip(row_headers, result)))
-    for x in result:
-        content = {'id': x[0], 'direction': x[1], 'bruto': x[2], 'neto': x[3], 'produce': x[4], 'containers':x[5]}
-        json_data.append(content)
-        content = {}
-    return json.dumps(json_data)
 
 @app.route('/batch-weight/<file>')
 def batch_weight(file):
@@ -240,6 +215,7 @@ def unknown():
         return "There is none UNKNOWN weight"
     else:
         return ret
+
 
 @app.route('/item/<idarg>', methods=['GET'])
 def item(idarg):
@@ -339,123 +315,150 @@ def session(id):
     return json.dumps(json_data)[1:][:-1] # strip first and last character
 
 
-
-
-@app.route('/weight', methods=['POST'])
+@app.route('/weight', methods=['POST', 'GET'])
 def weight():
+    if request.method == 'GET':
 
-    direction = request.form.get('direction')
-    truck = request.form.get('truck')
-    containers = request.form.get('containers')
-    weight = request.form.get('weight')
-    unit = request.form.get('unit') # Convert to KG for storing in "transactions" table
-    force = request.form.get('force')
-    produce = request.form.get('produce')
+        mydb = mysql.connector.connect(
+            host="mysql-db",
+            user="root",
+            passwd="greengo",
+            database="weight",
+            auth_plugin='mysql_native_password'
+        )
+        tim = time.strftime("%Y%m%d%H%M%S", time.gmtime())
+        timt = time.strftime("%Y%m%d000000", time.gmtime())
+        t1 = request.args.get('from', default=timt)
+        t2 = request.args.get('to', default=tim)
+        f = request.args.get('filter', default="'in','out','none'")
+        mycursor = mydb.cursor()
+        arg = mycursor.execute(
+            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN " + t1 + " AND " + t2)
+        result = mycursor.fetchall()
+        json_data = []
+        row_headers = [val[0] for val in mycursor.description]
+        # json_data.append(dict(zip(row_headers, result)))
+        for x in result:
+            content = {'id': x[0], 'direction': x[1], 'bruto': x[2], 'neto': x[3], 'produce': x[4], 'containers': x[5]}
+            json_data.append(content)
+            content = {}
+        return json.dumps(json_data)
 
-    if unit == "lbs":
-        weight_kg = weight * 2.205
-    else:
-        weight_kg = int(weight)
 
-    mydb = connect_db()
+    if request.method == 'POST':
 
-    if direction == 'none':
-        in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
-                               "ORDER BY datetime DESC LIMIT 1")
+        direction = request.form.get('direction')
+        truck = request.form.get('truck')
+        containers = request.form.get('containers')
+        weight = request.form.get('weight')
+        unit = request.form.get('unit') # Convert to KG for storing in "transactions" table
+        force = request.form.get('force')
+        produce = request.form.get('produce')
 
-        if in_or_out[0][1] == 'in':
-            # in after none
-            print("'none' after 'in' not allowed (400)")
-            return "'none' after 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+        if unit == "lbs":
+            weight_kg = weight * 2.205
         else:
-            print("'none' - normal")
-            run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
-                       "'" + direction + "', '" + truck + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
-            return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+            weight_kg = int(weight)
 
-    if direction == 'in':
-        in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
-                               "ORDER BY datetime DESC LIMIT 1")
+        mydb = connect_db()
 
-        if in_or_out[0][1] == 'in':
-            # in after in
-            if force == 'true':
-                print("in after in - force")
-                truck_previous_session_id = test[0][0]
-                # overwrite bruto if forced
-                run_update(mydb, "UPDATE transactions SET bruto = "+str(weight_kg)+" "
-                           "WHERE id = "+str(truck_previous_session_id))
+        if direction == 'none':
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+                                   "ORDER BY datetime DESC LIMIT 1")
+
+            if in_or_out[0][1] == 'in':
+                # in after none
+                print("'none' after 'in' not allowed (400)")
+                return "'none' after 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+            else:
+                print("'none' - normal")
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
+                           "'" + direction + "', '" + truck + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
+                return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+
+        if direction == 'in':
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+                                   "ORDER BY datetime DESC LIMIT 1")
+
+            if in_or_out[0][1] == 'in':
+                # in after in
+                if force == 'true':
+                    print("in after in - force")
+                    truck_previous_session_id = test[0][0]
+                    # overwrite bruto if forced
+                    run_update(mydb, "UPDATE transactions SET bruto = "+str(weight_kg)+" "
+                               "WHERE id = "+str(truck_previous_session_id))
+                    # return info - only for in
+                    return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+                else:
+                    print("'in' after 'in' without force not allowed (400)")
+                    return "'in' after 'in' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
+
+            elif in_or_out[0][1] == 'out':
+                # in after out
+                print("in after out")
+                # normal new session
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
+                             "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
                 # return info - only for in
                 return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+
+            elif in_or_out[0][1] == 'none':
+                # in after none
+                print("in after none")
+                # normal new session
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
+                             "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
+                # return info - only for in
+                return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+
             else:
-                print("'in' after 'in' without force not allowed (400)")
-                return "'in' after 'in' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
-
-        elif in_or_out[0][1] == 'out':
-            # in after out
-            print("in after out")
-            # normal new session
-            run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
-                         "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
-            # return info - only for in
-            return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
-
-        elif in_or_out[0][1] == 'none':
-            # in after none
-            print("in after none")
-            # normal new session
-            run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
-                         "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
-            # return info - only for in
-            return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
-
-        else:
-            print("Operation unknown - not allowed (400)")
-            return "Operation unknown - not allowed (400)", status.HTTP_400_BAD_REQUEST
+                print("Operation unknown - not allowed (400)")
+                return "Operation unknown - not allowed (400)", status.HTTP_400_BAD_REQUEST
 
 
-    if direction == 'out':
-        in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
-                               "ORDER BY datetime DESC LIMIT 1")
+        if direction == 'out':
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+                                   "ORDER BY datetime DESC LIMIT 1")
 
-        if in_or_out[0][1] == 'in' or (in_or_out[0][1] == 'out' and force == 'true'):
-            # this implies 'in' then 'out' ...
-            # update info for truck ... with empty containers on truck
-            print("out after in OR out after out - forced")
-            truck_previous_session_id = in_or_out[0][0]
+            if in_or_out[0][1] == 'in' or (in_or_out[0][1] == 'out' and force == 'true'):
+                # this implies 'in' then 'out' ...
+                # update info for truck ... with empty containers on truck
+                print("out after in OR out after out - forced")
+                truck_previous_session_id = in_or_out[0][0]
 
-            bruto_was = run_select_one_value(mydb, "SELECT bruto FROM transactions WHERE id = "+str(truck_previous_session_id))
+                bruto_was = run_select_one_value(mydb, "SELECT bruto FROM transactions WHERE id = "+str(truck_previous_session_id))
 
-            total_weight_of_containers = 0
-            for container_id in str(containers).split(",") :
-                result = run_select(mydb, "SELECT weight, unit FROM containers_registered " \
-                                    "WHERE container_id = '"+str(container_id)+"'")[0]
-                if result[1] == 'kg':
-                    total_weight_of_containers += result[0]
+                total_weight_of_containers = 0
+                for container_id in str(containers).split(",") :
+                    result = run_select(mydb, "SELECT weight, unit FROM containers_registered " \
+                                        "WHERE container_id = '"+str(container_id)+"'")[0]
+                    if result[1] == 'kg':
+                        total_weight_of_containers += result[0]
+                    else:
+                        total_weight_of_containers += result[0] * 2.205
+
+                if total_weight_of_containers > 0:
+                    # update data in previous 'in' record - all container weights were known:
+                    run_update(mydb, "UPDATE transactions SET direction = 'out', truckTara = "+str(weight_kg)+
+                               ", neto = "+str(bruto_was-weight_kg-total_weight_of_containers)+" WHERE id = "+str(truck_previous_session_id))
+                    # return info - only for in
+                    return weight_json_out(mydb, truck_previous_session_id)
                 else:
-                    total_weight_of_containers += result[0] * 2.205
+                    # some container weights unknown - don't update 'neto'
+                    run_update(mydb, "UPDATE transactions SET direction = 'out', truckTara = "+str(weight_kg)+" "
+                               "WHERE id = "+str(truck_previous_session_id))
+                    # return info - only for in
+                    return weight_json_out(mydb, truck_previous_session_id)
 
-            if total_weight_of_containers > 0:
-                # update data in previous 'in' record - all container weights were known:
-                run_update(mydb, "UPDATE transactions SET direction = 'out', truckTara = "+str(weight_kg)+
-                           ", neto = "+str(bruto_was-weight_kg-total_weight_of_containers)+" WHERE id = "+str(truck_previous_session_id))
-                # return info - only for in
-                return weight_json_out(mydb, truck_previous_session_id)
+            elif in_or_out[0][1] == 'out' and force != 'true':
+                # out after out ... not forced
+                print("'out' after 'out' without force not allowed (400)")
+                return "'out' after 'out' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
+
             else:
-                # some container weights unknown - don't update 'neto'
-                run_update(mydb, "UPDATE transactions SET direction = 'out', truckTara = "+str(weight_kg)+" "
-                           "WHERE id = "+str(truck_previous_session_id))
-                # return info - only for in
-                return weight_json_out(mydb, truck_previous_session_id)
-
-        elif in_or_out[0][1] == 'out' and force != 'true':
-            # out after out ... not forced
-            print("'out' after 'out' without force not allowed (400)")
-            return "'out' after 'out' without force not allowed (400)", status.HTTP_400_BAD_REQUEST
-
-        else:
-            print("'out' without 'in' not allowed (400)")
-            return "'out' without 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
+                print("'out' without 'in' not allowed (400)")
+                return "'out' without 'in' not allowed (400)", status.HTTP_400_BAD_REQUEST
 
 
 if __name__ == "__main__":
