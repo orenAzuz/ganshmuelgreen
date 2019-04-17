@@ -1,8 +1,8 @@
 #!/bin/sh
 echo "Reload is in progress ...."
 cd $GIT_HOME/DevOps
-#git checkout ${BRANCH}
-#git pull origin ${BRANCH}
+git checkout ${BRANCH}
+git pull origin ${BRANCH}
 
 echo "Starting build containers ..."
 export LOGS=$GIT_HOME/DevOps/logs
