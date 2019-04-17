@@ -1,11 +1,12 @@
 # EXAMPLE
 # read in via: source <filename>
-export APP_DATA_PATH=/home/raz/Documents/week3_proj/local/Weight/app/in
-export DB_DATA_PATH=/home/raz/Documents/week3_proj/local/Weight/mysql/datadir
+export GIT_HOME= ./
+#export APP_DATA_PATH=/home/raz/Documents/week3_proj/local/Weight/app/in
+#export DB_DATA_PATH=/home/raz/Documents/week3_proj/local/Weight/mysql/datadir
 # this script directory is intended for scripts to be manually run - during development
-export DB_SCRIPT_PATH=/home/raz/Documents/week3_proj/local/Weight/mysql/scripts
+#export DB_SCRIPT_PATH=/home/raz/Documents/week3_proj/local/Weight/mysql/scripts
 # this script directory is mounted into MySQL container in a location that causes it to auto-run all scripts there
-export DB_AUTO_RUN_SCRIPTS=/home/raz/Documents/week3_proj/local/Weight/mysql/auto-run-scripts
+#export DB_AUTO_RUN_SCRIPTS=/home/raz/Documents/week3_proj/local/Weight/mysql/auto-run-scripts
 
 # set the environmental variables according to your filesystem, create directories if needed
 # run docker-compose up
