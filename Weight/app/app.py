@@ -17,18 +17,23 @@ app = Flask(__name__)
 
 logging.basicConfig(filename='Weight_Log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
 
-def connect_db():
-    mydb = mysql.connector.connect(
-        host=os.environ['DB_HOST'],
-        user="root",
-        passwd="greengo",
-        database="weight",
-        auth_plugin='mysql_native_password'
-    )
+def connect_or_reconnect_db(mydb):
+    # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
+    # some functionality requires a more persistent connection - not repeated connect/disconnect cycles
+    if not mydb.is_connected():
+        mydb = mysql.connector.connect(
+            host=os.environ['DB_HOST'],
+            user="root",
+            passwd="greengo",
+            database="weight",
+            auth_plugin='mysql_native_password'
+        )
     logging.debug('mySQL connection created successfully, mydb:'+str(mydb))
     return mydb
 
 def run_select(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
@@ -37,6 +42,8 @@ def run_select(mydb, sql):
 
 
 def run_select_json(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
@@ -49,6 +56,8 @@ def run_select_json(mydb, sql):
 
 
 def run_select_one_value(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
@@ -61,6 +70,8 @@ def run_select_one_value(mydb, sql):
 
 
 def run_insert(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     mydb.commit()
@@ -68,16 +79,20 @@ def run_insert(mydb, sql):
 
 
 def run_update(mydb, sql):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     mydb.commit()
     logging.debug("Record updated successfully")
 
 
-def weight_json_in_or_none(mydb, last_insert_id):
+def weight_json_in_or_none(mydb, session_id):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
 
-    sql_cursor.execute("SELECT id, truck, bruto FROM transactions WHERE id = " + str(last_insert_id))
+    sql_cursor.execute("SELECT id, truck, bruto FROM transactions WHERE id = " + str(session_id))
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
         print("Getting session values (not for 'in' or 'none' session type)")
@@ -96,11 +111,13 @@ def weight_json_in_or_none(mydb, last_insert_id):
     return json.dumps(json_data)[1:][:-1] # strip first and last character
 
 
-def weight_json_out(mydb, truck_previous_session_id):
+def weight_json_out(mydb, session_id):
+    # if connection dropped, reconnect
+    mydb = connect_or_reconnect_db(mydb)
     sql_cursor = mydb.cursor()
 
     sql_cursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " +
-                       str(truck_previous_session_id) + " AND direction = 'out'")
+                       str(session_id) + " AND direction = 'out'")
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
         logging.debug("Getting session values (not for 'out' session type)")
@@ -328,7 +345,7 @@ def session(id):
 
     sql_cursor = mydb.cursor()
 
-    sql_cursor.execute("SELECT id, truck, bruto, truckTara, neto FROM transactions WHERE id = " +
+    sql_cursor.execute("SELECT id, truck, bruto, truckTara, neto, produce FROM transactions WHERE id = " +
                       id + " AND direction = 'out'")
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
@@ -336,7 +353,7 @@ def session(id):
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
 
     else:
-        sql_cursor.execute("SELECT id, truck, bruto FROM transactions WHERE id = " + id)
+        sql_cursor.execute("SELECT id, truck, bruto, produce FROM transactions WHERE id = " + id)
         results = sql_cursor.fetchall()
         if sql_cursor.rowcount > 0:
             logging.debug("Getting session values (for 'in' or 'none' session type)")
@@ -370,7 +387,7 @@ def weight():
         f = request.args.get('filter', default="'in','out','none'")
         mycursor = mydb.cursor()
         arg = mycursor.execute(
-            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN " + t1 + " AND " + t2)
+            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN ('" + f + "') AND datetime BETWEEN " + t1 + " AND " + t2)
         result = mycursor.fetchall()
         json_data = []
         row_headers = [val[0] for val in mycursor.description]
@@ -394,30 +411,45 @@ def weight():
         produce = request.form.get('produce')
 
         if unit == "lbs":
-            weight_kg = weight * 2.205
-        else:
+            weight_kg = int(weight) * 2.205
+        elif unit == "kg":
             weight_kg = int(weight)
+        else:
+            return "Invalid unit - 'kg' or 'lbs' required (400)", 400
 
-        mydb = connect_db()
+        mydb = mysql.connector.connect(
+            host=os.environ['DB_HOST'],
+            user="root",
+            passwd="greengo",
+            database="weight",
+            auth_plugin='mysql_native_password'
+        )
+
+        # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
+        # some functionality requires a more persistent connection - not repeated connect/disconnect cycles
+        mydb = connect_or_reconnect_db(mydb)
 
         if direction == 'none':
-            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
 
-            if in_or_out[0][1] == 'in':
+            if len(in_or_out) > 0 and in_or_out[0][1] == 'in':
                 # in after none
                 print("'none' after 'in' not allowed (400)")
                 logging.error("'none' after 'in' not allowed: 400")
                 return "'none' after 'in' not allowed (400)", 400
             else:
                 print("'none' - normal")
-                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
-                           "'" + direction + "', '" + truck + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, containers, bruto, produce) VALUES (now(), " \
+                           "'" + direction + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
                 logging.debug("Returning weight infornation: "+str(weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))))
                 return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
         if direction == 'in':
-            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
+            if not truck:
+                return "Required 'truck' value not supplied (400)", 400
+
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
 
             if in_or_out[0][1] == 'in':
@@ -430,7 +462,10 @@ def weight():
                                "WHERE id = "+str(truck_previous_session_id))
                     # return info - only for in
                     logging.debug("changing value")
-                    return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
+                    return weight_json_in_or_none(mydb, truck_previous_session_id)
+                elif in_or_out[0][1] == 'none':
+                    logging.error("'in' after 'none' not allowed (400)")
+                    return "'in' after 'none' not allowed (400)", 400
                 else:
                     logging.error("'in' after 'in' without force not allowed (400)")
                     return "'in' after 'in' without force not allowed (400)", 400
@@ -461,6 +496,9 @@ def weight():
 
 
         if direction == 'out':
+            if not truck:
+                return "Required 'truck' value not supplied (400)", 400
+
             in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
 
