@@ -90,6 +90,7 @@ def http_request(port):
 
 def test():
     url = "http://18.222.236.224:8081/health"
+    print(requests.get(url))
     return null
 
 
