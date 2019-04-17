@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 
 from flask import Flask, render_template, request, json
+from flask_mail import Mail, Message
+import requests
 import subprocess
-
+import datetime
+import json
 #PORT = 8000
 
 from flask_mail import Mail, Message
@@ -28,44 +31,71 @@ def api_root():
 	mestxt = "ROOT OK"
 	return render_template('index.html',message=mestxt)
 
-
 @app.route("/health")
 def api_health():
 	mestxt = "HEALTH OK"
 	return render_template('index.html',message=mestxt)
 
+
 @app.route("/reload",methods=['POST'])
 def api_reload():
-	print('request.get_data : ',request.get_data)
-	print('request.query_string : ',request.query_string)
-	subprocess.call(['./reload.sh'])
-	mestxt = "RELOAD OK: new deploy from git. branch -> master. "
-	send_mail(mestxt)
-	return render_template('index.html',message=mestxt)
+    subprocess.call(['./reload.sh'])
+    data = json.loads(json.dumps(request.get_json()))
+    commits = data["commits"]
+    id = commits[0]
+    committer = id["committer"]
+    name = committer["name"]
+    email = committer["email"]
+    mestxt = "New deploy from git. branch -> master. "
+    return send_mail(mestxt,name ,email)
 
 
-# @app.route("/mail", methods=['GET'])
-def send_mail(message):
-
-	msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
-	msg.body = 'The status is ok:200'  # Customize based on user input
-	mail.send(msg)
-
-	return 'done'
+def send_mail(message, name ,email):
+    weight_status = http_request(8081)
+    billing_status = http_request(8080)
+    today = datetime.datetime.now()
+    today_now = "{:%Y-%m-%d %H:%M:%S}".format(today)
+    status = (weight_status, billing_status, today_now, name, email)
+    body_txt = 'The status code for weight is: %s .\n' \
+               'The status code for billing is: %s . ' \
+               '\n%s \nModifyed by: %s .\nEmail: %s' % status
+    print(body_txt)
+    msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
+    msg.body = body_txt
+    mail.send(msg)
+    return render_template('index.html',message=mestxt)
 
 
 def get_mail_list():
-	return ['orezaz@gmail.com',
-		    'yaniv.d@develeap.com',
-			'nirdod@gmail.com',
-			'giuliovnturi@gmail.com'
-			'ilana.fisher.il@gmail.com',
-			'razleshem3@gmail.com',
-			'br.cohen@hotmail.fr',
-			'emanaz.91@gmail.com',
-			'sharontabakman@gmail.com',
-			'stacnospam@gmail.com']
+    return ['orezaz@gmail.com',
+            'yaniv.d@develeap.com',
+            'nirdod@gmail.com',
+            'giuliovnturi@gmail.com',
+            'ilana.fisher.il@gmail.com',
+            'razleshem3@gmail.com',
+            'br.cohen@hotmail.fr',
+            'emanaz.91@gmail.com',
+            'sharontabakman@gmail.com',
+            'stacnospam@gmail.com']
 
+
+def http_request(port):
+    url = "http://18.222.236.224:%s/health" % port
+    try:
+        r = requests.get(url)
+        return r.status_code
+    except requests.exceptions.RequestException:
+        return 111
+
+
+def test():
+    url = "http://18.222.236.224:8081/health"
+    return null
+
+
+def post_weight():
+    json_string = ""
+    res = requests.post('http://18.222.236.224:8081/weight', data=json_string)
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)

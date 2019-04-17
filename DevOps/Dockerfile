@@ -9,17 +9,16 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt --src /usr/local/src
-RUN pip3 install flask_mail
 
 COPY templates/index.html templates/
 COPY app.py .
 COPY reload.sh .
+
 RUN chmod +x app.py
 RUN chmod +x reload.sh
 
 EXPOSE 5000
 
-#ENTRYPOINT [ "python3" ]
 CMD python3 app.py
 
 #docker build -t devops .

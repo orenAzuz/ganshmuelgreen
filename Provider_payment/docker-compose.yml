@@ -2,35 +2,30 @@ version: '2'
 services:
 
   mysql-db:
-    container_name: mysql-c
+    container_name: billdb
     image: mysql
-    # ports used for development
-    ports:
-      - "3306:3306"
+    # ports:
+          # - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
       - db_data:/var/lib/mysql
-      # this directory is used to automatically load all scripts found in there 
-      - ${GIT_HOME}/Weight/mysql/auto-run-scripts:/docker-entrypoint-initdb.d
+      - ${GIT_HOME}/Provider_payment/sql:/docker-entrypoint-initdb.d/
     # all ports available via shared network
     networks:
       - shared
 
-  weigh-app:
-    container_name: weigh-app-c
-    image: weigh-app
+  bill-app:
+    container_name: billsrv
+    image: billsrvimg
     ports:
-      - "8081:8000"
-    environment:
-      DB_HOST: mysql-c
+          - 8080:8080
     build: 
-      context: ${GIT_HOME}/Weight/app
+      context: ${GIT_HOME}/Provider_payment/app
       dockerfile: Dockerfile  
     networks:
       - shared
     volumes:
-      - ${GIT_HOME}/Weight/app:/app
       - app_data:/in
     entrypoint: 
       - python3 
@@ -44,7 +39,7 @@ volumes:
       type: none
       o: bind
       # set based on your environment
-      device: "${GIT_HOME}/Weight/app/in"
+      device: "${GIT_HOME}/Provider_payment"
 
   db_data:
     driver: local
@@ -52,7 +47,7 @@ volumes:
       type: none
       o: bind
       # set based on your environment
-      device: "${GIT_HOME}/Weight/mysql/datadir"
+      device: "${HOME}/billdb"
 
 networks:
   shared:

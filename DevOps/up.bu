@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+
+echo "Starting build image ..."
+file=$1
+
+if [ -f "$file" ]
+then
+  echo "$file found."
+else
+  file="env.ini"
+  echo "reading from file $file"
+fi
+
+echo "Working folder is $PWD"
+. ./set-env.sh
+
+echo "HOME DATA folder is $HOME_DATA"
+echo "WEIGH_DB_SCRIPT_PATH = $WEIGH_DB_SCRIPT_PATH"
+
+DEVOPT_PORT=$(awk -F "=" '/PORT/ {print $2}' $file)
+IMG_NAME=$(awk -F "=" '/IMG_NAME/ {print $2}' $file)
+
+CONTAINER_NAME=$IMG_NAME'_server'
+
+echo "Port is $DEVOPT_PORT"
+echo "container name is $CONTAINER_NAME"
+
+docker-compose run devops-app
+##docker build -t $IMG_NAME .
+
+##docker stop $CONTAINER_NAME
+##docker rm $CONTAINER_NAME
+##docker run -d --name $CONTAINER_NAME -p $DEVOPT_PORT:5000 $IMG_NAME
+
+
