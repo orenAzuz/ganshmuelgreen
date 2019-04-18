@@ -13,8 +13,8 @@ import logging
 app = Flask(__name__)
 
 # Consts
-# DBHOST = 'mysql-db'
-DBHOST = '0.0.0.0'
+DBHOST = 'mysql-db'
+#DBHOST = '0.0.0.0'
 # HOST = '18.222.236.224'
 HOST = '0.0.0.0'
 
@@ -227,7 +227,7 @@ def bill(providerId):
             else:
                 logErrorMessage("Provider hasn't been found")
                 connection.commit()
-                connection.close()
+                return "Provider hasn't been found", 420
 
         connection.commit()
     finally:
