@@ -1,5 +1,8 @@
 #!/bin/bash
 echo
+echo SESSION ENDPOINT:
+echo =================
+echo
 
 echo "Test invalid session:"
 ./test-session.sh 18.222.236.224:8081 1000

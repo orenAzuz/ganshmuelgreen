@@ -2,6 +2,8 @@
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+echo "WEIGHT (POST) ENDPOINT:"
+echo =======================
 #echo -e "${BLUE}Weigh truck (in) with 3 containers (truck info missing):${NC}"
 echo
 echo "Weigh truck (in) with 3 containers (truck info missing):"
@@ -41,6 +43,3 @@ echo "Using pounds ... Weigh new truck 'in' after 'out' (converts & stores as kg
 ./post-lbs-kg.sh 18.222.236.224:8081 in 33222 A10233 lbs
 
 
-
-
-echo
