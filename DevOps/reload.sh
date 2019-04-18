@@ -4,9 +4,9 @@ cd $GIT_HOME/DevOps
 git checkout ${BRANCH}
 git pull origin ${BRANCH}
 
-sudo rm -rf $HOME/billdb
-mkdir $HOME/billdb
-chmod 777 $HOME/billdb
+#sudo rm -rf $HOME/billdb
+#mkdir $HOME/billdb
+#chmod 777 $HOME/billdb
 sudo rm -rf $GIT_HOME/Weight/mysql/datadir
 mkdir -p $GIT_HOME/Weight/mysql/datadir
 chmod 777 $GIT_HOME/Weight/mysql/datadir
