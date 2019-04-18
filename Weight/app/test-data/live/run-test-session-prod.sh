@@ -13,4 +13,3 @@ echo "Test valid 'out' session:"
 echo "Test valid 'out' session:"
 ./test-session.sh 18.222.236.224:8081 15
 
-echo
