@@ -106,8 +106,20 @@ def post_weight():
     return str(res.text)
 
 
-def get_weight():  
-    return
+def get_item():
+    res = requests.get("http://18.222.236.224:8081/item/11")
+    return str(res.text)
+
+
+def get_weight():
+    res = requests.get("http://18.222.236.224:8081/session/11")
+    return str(res.text)
+
+
+def get_session():
+    res = requests.get("http://18.222.236.224:8081/session/11")
+    return str(res.text)
+
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
