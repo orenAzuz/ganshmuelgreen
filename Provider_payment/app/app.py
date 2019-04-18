@@ -4,6 +4,7 @@ import pymysql
 import pymysql.cursors
 from flask import Flask
 import urllib
+import requests
 import http.client
 import json
 from flask import send_file
@@ -15,7 +16,7 @@ app = Flask(__name__)
 # Consts
 DBHOST = 'mysql-db-bill'
 #DBHOST = '0.0.0.0'
-HOST = "weigh-app-c"
+HOST = "weigh-app"
 #HOST = '0.0.0.0'
 
 
@@ -133,8 +134,11 @@ def getTruck(id):
     try:
         logDebugMessage("http://%s:8000/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2)))
         weightUrl = "http://%s:8000/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2))
-        response = urllib.request.urlopen(weightUrl)
-        return response.read()
+        #response = urllib.request.urlopen(weightUrl)
+
+        response = requests.get(weightUrl).text
+        logDebugMessage(response)
+        return response
     except (http.client.HTTPException, Exception) as e:
         logDebugMessage(str(e))
         return '{"id": "1234", "tara": 0, "sessions": [10]}', 420
@@ -171,18 +175,21 @@ def bill(providerId):
                     logDebugMessage("After getting trucks")
                     truckCount += 1  # count trucks
                     truckStr = getTruck(truckRow['id'])
-                    logDebugMessage("Truck is :" + str(truckStr))
-                    truckData = json.loads(str(truckStr))  # Convert to json object
+
+                    logDebugMessage(truckStr)
+
+                    truckData = json.loads(truckStr)  # Convert to json object
                     sessions = truckData['sessions']
                     logDebugMessage("Sessions are :" + str(sessions))
                     sessionCount += len(sessions)  # accumulate sessions
                     for sessionId in sessions:
                         sessionUrl = "http://%s:8000/session/%s" % (HOST, str(sessionId))
-                        logDebugMessage("Session URL is:" + str(sessionUrl))
-                        response = urllib.request.urlopen(sessionUrl)
-                        sessionStr = response.read()
-                        logDebugMessage("Session str is:" + str(sessionStr))
-                        sessionData = json.loads(str(sessionStr))  # Convert to json object
+                        logDebugMessage("Session URL is:" + sessionUrl)
+                        response = requests.get(sessionUrl).text
+                        #response = urllib.request.urlopen(sessionUrl)
+                        #sessionStr = response.read()
+                        logDebugMessage("Session str is:" + response)
+                        sessionData = json.loads(response)  # Convert to json object
 
                         # Initialize produce in products table
                         if products.get(sessionData['produce']) is None:
