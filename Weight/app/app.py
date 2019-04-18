@@ -302,7 +302,7 @@ def item(idarg):
 
                 for container in container_list:
                     if idarg == container:
-                        if line[2] == "in" or line[2] == None:
+                        if line[2] == "out" or line[2] == None:
                             sessions.append(line[0])
                             there_is_container = True
 
@@ -318,7 +318,7 @@ def item(idarg):
 
         sessions = []
         for line in query_result:
-            if line[2] == "in" or line[2] == None:
+            if line[2] == "out" or line[2] == None:
                 sessions.append(line[0])
 
         data = {
@@ -384,10 +384,15 @@ def weight():
             database="weight",
             auth_plugin='mysql_native_password'
         )
-        tim = time.strftime("%Y%m%d%H%M%S", time.gmtime())
-        timt = time.strftime("%Y%m%d000000", time.gmtime())
+        now = datetime.datetime.now()
+        tim = now.strftime("%Y-%m-%d 00:00:00")
+        timt = now.strftime("%Y-%m-%d %H:%M:%S")
         t1 = request.args.get('from', default=timt)
         t2 = request.args.get('to', default=tim)
+        #2019010101400
+        t11 = f"{t1[0:4]}-{t1[4:6]}-{t1[6:8]} {t1[8:10]}:{t1[10:12]}:{t1[12:14]}"
+        t22 = f"{t2[0:4]}-{t2[4:6]}-{t2[6:8]} {t2[8:10]}:{t2[10:12]}:{t2[12:14]}"
+
         f = request.args.get('filter', default="'in','out','none'")
         mycursor = mydb.cursor()
 
