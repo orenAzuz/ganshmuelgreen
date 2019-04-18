@@ -84,6 +84,6 @@ INSERT INTO `containers_registered` (`container_id`, `weight`, `unit`) VALUES
 ('C-35537',292,'kg'),
 ('K-8263',666,'lbs'),
 ('K-5269',666,'lbs'),
-('K-7943',644,'lbs');
+('K-7943',644,'lbs'),
 ('K-7043',null,'lbs');
 
