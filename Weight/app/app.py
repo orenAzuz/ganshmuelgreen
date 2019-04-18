@@ -390,8 +390,13 @@ def weight():
         t2 = request.args.get('to', default=tim)
         f = request.args.get('filter', default="'in','out','none'")
         mycursor = mydb.cursor()
-        arg = mycursor.execute(
+
+        if f=='in' or f=='out':
+            arg = mycursor.execute(
             "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN ('" + f + "') AND datetime BETWEEN " + t1 + " AND " + t2)
+        else: 
+            arg = mycursor.execute(
+            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN " + t1 + " AND " + t2)
         result = mycursor.fetchall()
         json_data = []
         row_headers = [val[0] for val in mycursor.description]
