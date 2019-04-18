@@ -13,8 +13,10 @@ chmod 777 $GIT_HOME/Weight/mysql/datadir
 
 weigh_compose=$GIT_HOME/Weight/docker-compose.yml
 bill_compose=$GIT_HOME/Provider_payment/docker-compose.yml
+all_compose=$GIT_HOME/docker-compose.yml
 
-for i in $bill_compose $weigh_compose  ; do 
+#for i in $bill_compose $weigh_compose  ; do
+for i in $all_compose  ; do 
 	echo "compose file is ${i}"
 	echo && echo "Upload process says: docker-compose down" && \	
 	docker-compose --file "${i}"  down && \	
