@@ -4,6 +4,7 @@ import pymysql
 import pymysql.cursors
 from flask import Flask
 import urllib
+import http.client
 import json
 from flask import send_file
 import csv
@@ -75,9 +76,12 @@ def updateTruck(id, provider_id):
 def getTruck(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
-    weightUrl = "http://green,develeap.com:8081/item/%s?from=%s&to=%s" % (str(id), str(t1), str(t2))
-    response = urllib.request.urlopen(weightUrl)
-    return response.read()
+    try:
+        weightUrl = "http://18.222.236.224/item/%s?from=%s&to=%s" % (str(id), str(t1), str(t2))
+        response = urllib.request.urlopen(weightUrl)
+        return response.read()
+    except (urllib.HTTPError, urllib.URLError, http.client.HTTPException, Exception):
+        return '{"id":1234, "tara":85000, "sessions":[10]}'
 
 
 @app.route('/bill/<providerId>', methods=['GET'])
@@ -109,21 +113,23 @@ def bill(providerId):
                 truckCount += 1  # count trucks
                 truck = truckRow['id']
                 # truckStr = getTruck(truck) TODO from weight team
-                truckStr = '{"id":1234, "tara":85000, "sessions":[10]}'  # Get truck data from API
+                truckStr = '{"id":10000, "tara":1200, "sessions":[11]}'  # Get truck data from API
                 truckData = json.loads(truckStr)  # Convert to json object
                 sessions = truckData['sessions']
                 sessionCount += len(sessions)  # accumulate sessions
                 for sessionId in sessions:
-                    # sessionUrl = "http://green.develeap.com:8081/session/%s" % str(id) TODO from weight team
-                    # sessionStr = urllib.request.urlopen(sessionUrl) TODO from weight team
-                    sessionStr = '{"id":10, "truck":"134-33-443", "bruto":70000, "truckTara":85000, "produce":"Blood", "neto":60000}'  # Get session data
+                    # sessionUrl = "http://18.222.236.224:8081/session/%s" % str(id) TODO change to production
+                    sessionUrl = "http://0.0.0.0:8081/session/%s" % str(id)
+                    sessionStr = urllib.request.urlopen(sessionUrl)
+                    #sessionStr = '{"id":10, "truck":"134-33-443", "bruto":70000, "truckTara":85000, "produce":"Blood", "neto":60000}'  # Get session data
                     sessionData = json.loads(sessionStr)  # Convert to json object
 
                     # Initialize produce in products table
                     if products.get(sessionData['produce']) is None:
                         products[sessionData['produce']] = {}
 
-                    products[sessionData['produce']]['produce'] = sessionData['produce']  # Set product name
+                    # Set product name
+                    products[sessionData['produce']]['produce'] = sessionData['produce']
 
                     # Set accumulation of product sessions count
                     if products[sessionData['produce']].get('count'):
