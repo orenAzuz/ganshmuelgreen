@@ -9,4 +9,4 @@ export SLEEP=0
 ./run-test-unknown.sh
 ./run-test-item-prod.sh
 ./run-test-weight-get.sh
-./run-test-batch-weight.sh
+./run-test-batch-weight-prod.sh
