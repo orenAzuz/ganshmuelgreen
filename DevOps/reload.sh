@@ -5,11 +5,13 @@ git checkout ${BRANCH}
 git pull origin ${BRANCH}
 
 echo "Starting build containers ..."
-export LOGS=$GIT_HOME/DevOps/logs
-rm -f $LOGS/*
+#export LOGS=$GIT_HOME/DevOps/logs
+
+#rm -f $LOGS/*
+sudo rm -rf $HOME/billdb
 mkdir $HOME/billdb
 chmod 777 $HOME/billdb
-#rm -rf $GIT_HOME/Weight/mysql/datadir
+sudo rm -rf $GIT_HOME/Weight/mysql/datadir
 mkdir -p $GIT_HOME/Weight/mysql/datadir
 chmod 777 $GIT_HOME/Weight/mysql/datadir
 
@@ -24,7 +26,7 @@ for i in $bill_compose $weigh_compose  ; do
 	docker-compose   --file "${i}" build --no-cache  && \
 	echo "Upload process says: docker-compose up ..." && \
 	docker-compose --file "${i}" up --force-recreate --remove-orphans &
-# 1> $LOGS/out.log 2>$LOGS/errors.log 
+#1> $LOGS/out.log 2>$LOGS/errors.log 
 done
 
 
