@@ -13,9 +13,9 @@ import logging
 app = Flask(__name__)
 
 # Consts
-DBHOST = 'mysql-db'
+DBHOST = 'mysql-db-bill'
 #DBHOST = '0.0.0.0'
-HOST = '18.222.236.224'
+HOST = "weigh-app-c"
 #HOST = '0.0.0.0'
 
 
@@ -131,13 +131,13 @@ def getTruck(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
     try:
-        logDebugMessage("http://%s:8081/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2)))
-        weightUrl = "http://%s:8081/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2))
+        logDebugMessage("http://%s:8000/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2)))
+        weightUrl = "http://%s:8000/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2))
         response = urllib.request.urlopen(weightUrl)
         return response.read()
     except (http.client.HTTPException, Exception) as e:
         logDebugMessage(str(e))
-        return '{"id": "A10000", "tara": 1200, "sessions": [11]}', 420
+        return '{"id": "1234", "tara": 0, "sessions": [10]}', 420
 
 
 @app.route('/bill/<providerId>', methods=['GET'])
@@ -171,18 +171,18 @@ def bill(providerId):
                     logDebugMessage("After getting trucks")
                     truckCount += 1  # count trucks
                     truckStr = getTruck(truckRow['id'])
-                    logDebugMessage("Truck is :" + truckStr)
-                    truckData = json.loads(truckStr)  # Convert to json object
+                    logDebugMessage("Truck is :" + str(truckStr))
+                    truckData = json.loads(str(truckStr))  # Convert to json object
                     sessions = truckData['sessions']
-                    logDebugMessage("Sessions are :" + sessions)
+                    logDebugMessage("Sessions are :" + str(sessions))
                     sessionCount += len(sessions)  # accumulate sessions
                     for sessionId in sessions:
-                        sessionUrl = "http://%s:8081/session/%s" % (HOST, str(sessionId))
-                        logDebugMessage("Session URL is:" + sessionUrl)
+                        sessionUrl = "http://%s:8000/session/%s" % (HOST, str(sessionId))
+                        logDebugMessage("Session URL is:" + str(sessionUrl))
                         response = urllib.request.urlopen(sessionUrl)
                         sessionStr = response.read()
-                        logDebugMessage("Session str is:" + sessionStr)
-                        sessionData = json.loads(sessionStr)  # Convert to json object
+                        logDebugMessage("Session str is:" + str(sessionStr))
+                        sessionData = json.loads(str(sessionStr))  # Convert to json object
 
                         # Initialize produce in products table
                         if products.get(sessionData['produce']) is None:
@@ -214,7 +214,7 @@ def bill(providerId):
                             for rateRow in rateRows:
                                 if [[rateRow['scope'] == str(providerId)]]:
                                     rate = rateRow['rate']
-                                    logDebugMessage(rate)
+                                    logDebugMessage(str(rate))
                                     break;
                                 else:
                                     rateAll = rateRow['rate']
