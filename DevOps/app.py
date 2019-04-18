@@ -38,7 +38,7 @@ def api_health():
 	return render_template('index.html',message=mestxt)
 
 
-@app.route("/reload",methods=['POST'])
+@app.route("/reload", methods=['POST'])
 def api_reload():
     subprocess.call(['./reload.sh'])
     time.sleep(200)
@@ -65,7 +65,7 @@ def send_mail(message, name ,email):
     msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
     msg.body = body_txt
     mail.send(msg)
-    return render_template('index.html',message=mestxt)
+    return render_template('index.html',message=message)
 
 
 def get_mail_list():
