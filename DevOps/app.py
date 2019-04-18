@@ -89,6 +89,7 @@ def http_request(port):
     except requests.exceptions.RequestException:
         return 111
 
+
 @app.route("/test")
 def test():
     url = "http://18.222.236.224:8081/health"
@@ -97,11 +98,16 @@ def test():
 
 
 def post_weight():
-    "=&=&=,,&=&=&="
-    json_string = {"truck": "A10202", "force": "true", "containers" :[ "C-35434" , "K-8263","K-7943"],
-                   "weight":"2000","unit":"kg","produce":"oranges"}
-    return requests.post('http://18.222.236.224:8081/weight', data=json_string)
 
+    data = [("direction","in"),("truck","A10202"), ("force","true"), ("containers","C-35434,K-8263,K-7943"),
+            ("weight","2000"),("unit","kg"),("produce","oranges")]
+    print(data)
+    res = requests.post('http://18.222.236.224:8081/weight', data=data)
+    return str(res.text)
+
+
+def get_weight():  
+    return
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
