@@ -302,7 +302,7 @@ def item(idarg):
 
                 for container in container_list:
                     if idarg == container:
-                        if line[2] == "in" or line[2] == None:
+                        if line[2] == "out" or line[2] == None:
                             sessions.append(line[0])
                             there_is_container = True
 
