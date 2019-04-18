@@ -170,65 +170,69 @@ def health():
         return 'Failure', 500
 
 
-@app.route('/batch-weight/<file>')
+@app.route('/batch-weight/<file>', methods = ['POST'])
 def batch_weight(file):
+    if request.method == 'POST':
 
-    results="Field added:<br>"
+        results="Field added:<br>"
 
-    mydb = mysql.connector.connect(
-      host=os.environ['DB_HOST'],
-      user="root",
-      passwd="greengo",
-      database="weight",
-      auth_plugin='mysql_native_password'
-    )
+        mydb = mysql.connector.connect(
+          host=os.environ['DB_HOST'],
+          user="root",
+          passwd="greengo",
+          database="weight",
+          auth_plugin='mysql_native_password'
+        )
 
-    sqlcursor = mydb.cursor()
+        sqlcursor = mydb.cursor()
 
-    if file in os.listdir("in/"):
-        if file.lower().endswith(('.csv')):
-            new_batch = open("in/"+file)
-            lines = new_batch.readlines()
-            unit = lines[0][:-1].split(',')[1]
-            if unit[0] == '"' and unit[-1] == '"':
-                unit = unit[1:-1]
-            for line in lines[1:]:
-                container_id = line.split(',')[0]
-                weight = line.split(',')[1]
+        if file in os.listdir("in/"):
+            if file.lower().endswith(('.csv')):
+                new_batch = open("in/"+file)
+                lines = new_batch.readlines()
+                unit = lines[0][:-1].split(',')[1]
+                if unit[0] == '"' and unit[-1] == '"':
+                    unit = unit[1:-1]
+                for line in lines[1:]:
+                    container_id = line.split(',')[0]
+                    weight = line.split(',')[1]
 
-                try:
-                    logging.debug("insert to table containers_registered id, weight and unit")
-                    sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
-                    mydb.commit()
-                    results+= container_id + " " + weight + " " + unit + "<br>"
-                except mysql.connector.IntegrityError:
-                    logging.error("mysql connector IntegrityError error")
-                    pass
-
-
-        elif file.lower().endswith(('.json')):
-            new_batch = open("in/"+file)
-            lines = json.load(new_batch)
-            for line in lines:
-                container_id = line["id"]
-                weight = line["weight"]
-                unit = line["unit"]
-
-                try:
-                    logging.debug("insert to table containers_registered id, weight and unit")
-                    sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
-                    mydb.commit()
-                    results+= container_id + " " + str(weight) + " " + unit + "<br>"
-                except mysql.connector.IntegrityError:
-                    logging.error("mysql connector IntegrityError error")
-                    pass 
+                    try:
+                        logging.debug("insert to table containers_registered id, weight and unit")
+                        sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                        mydb.commit()
+                        results+= container_id + " " + weight + " " + unit + "<br>"
+                    except mysql.connector.IntegrityError:
+                        logging.error("mysql connector IntegrityError error")
+                        pass
 
 
-        new_batch.close()
+            elif file.lower().endswith(('.json')):
+                new_batch = open("in/"+file)
+                lines = json.load(new_batch)
+                for line in lines:
+                    container_id = line["id"]
+                    weight = line["weight"]
+                    unit = line["unit"]
 
-    mydb.close()
-    logging.debug("Returning file containing: "+str(results))
-    return results
+                    try:
+                        logging.debug("insert to table containers_registered id, weight and unit")
+                        sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                        mydb.commit()
+                        results+= container_id + " " + str(weight) + " " + unit + "<br>"
+                    except mysql.connector.IntegrityError:
+                        logging.error("mysql connector IntegrityError error")
+                        pass 
+
+
+            new_batch.close()
+
+        else:
+            results = f"No {file} file found"
+
+        mydb.close()
+        logging.debug("Returning file containing: "+str(results))
+        return results
 
 @app.route('/unknown')
 def unknown():
@@ -386,8 +390,13 @@ def weight():
         t2 = request.args.get('to', default=tim)
         f = request.args.get('filter', default="'in','out','none'")
         mycursor = mydb.cursor()
-        arg = mycursor.execute(
+
+        if f=='in' or f=='out':
+            arg = mycursor.execute(
             "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN ('" + f + "') AND datetime BETWEEN " + t1 + " AND " + t2)
+        else: 
+            arg = mycursor.execute(
+            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN " + t1 + " AND " + t2)
         result = mycursor.fetchall()
         json_data = []
         row_headers = [val[0] for val in mycursor.description]
