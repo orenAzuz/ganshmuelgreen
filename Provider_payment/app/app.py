@@ -15,8 +15,8 @@ app = Flask(__name__)
 # Consts
 DBHOST = 'mysql-db'
 #DBHOST = '0.0.0.0'
-# HOST = '18.222.236.224'
-HOST = '0.0.0.0'
+HOST = '18.222.236.224'
+#HOST = '0.0.0.0'
 
 
 @app.route('/health')
@@ -131,11 +131,13 @@ def getTruck(id):
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
     try:
+        logDebugMessage("http://%s:8081/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2)))
         weightUrl = "http://%s:8081/item/%s?from=%s&to=%s" % (HOST, str(id), str(t1), str(t2))
         response = urllib.request.urlopen(weightUrl)
         return response.read()
-    except (http.client.HTTPException, Exception):
-        return '{"id":1234, "tara":85000, "sessions":[10]}'
+    except (http.client.HTTPException, Exception) as e:
+        logDebugMessage(str(e))
+        return '{"id": "A10000", "tara": 1200, "sessions": [11]}', 420
 
 
 @app.route('/bill/<providerId>', methods=['GET'])
@@ -166,19 +168,25 @@ def bill(providerId):
                 cursor.execute(query, (str(providerId)), )
                 truckRows = cursor.fetchall()
                 for truckRow in truckRows:
+                    logDebugMessage("After getting trucks")
                     truckCount += 1  # count trucks
                     truckStr = getTruck(truckRow['id'])
+                    logDebugMessage("Truck is :" + truckStr)
                     truckData = json.loads(truckStr)  # Convert to json object
                     sessions = truckData['sessions']
+                    logDebugMessage("Sessions are :" + sessions)
                     sessionCount += len(sessions)  # accumulate sessions
                     for sessionId in sessions:
                         sessionUrl = "http://%s:8081/session/%s" % (HOST, str(sessionId))
+                        logDebugMessage("Session URL is:" + sessionUrl)
                         response = urllib.request.urlopen(sessionUrl)
                         sessionStr = response.read()
+                        logDebugMessage("Session str is:" + sessionStr)
                         sessionData = json.loads(sessionStr)  # Convert to json object
 
                         # Initialize produce in products table
                         if products.get(sessionData['produce']) is None:
+                            logDebugMessage("New produce")
                             products[sessionData['produce']] = {}
 
                         # Set product name
@@ -192,6 +200,7 @@ def bill(providerId):
 
                         # Set accumulation of product neto tara amount
                         if sessionData.get('neto'):
+                            logDebugMessage("Session has Neto!!")
                             if products[sessionData['produce']].get('amount'):
                                 products[sessionData['produce']]['amount'] += sessionData['neto']
                             else:
@@ -211,6 +220,7 @@ def bill(providerId):
                                     rateAll = rateRow['rate']
                             if not rate:
                                 rate = rateAll
+                            logDebugMessage("Rate is " + str(rate))
                             products[sessionData['produce']]['rate'] = rate
 
                             # Calc pay from rate and amount and accumulate product pay
@@ -310,19 +320,19 @@ def insertNewRates():
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
 
-        for row in csv_reader:
-            if line_count == 0:
-                logDebugMessage('Column names are ' + ", ".join(row))
-            elif line_count == 1:
-                query += '(\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
+            for row in csv_reader:
+                if line_count == 0:
+                    logDebugMessage('Column names are ' + ", ".join(row))
+                elif line_count == 1:
+                    query += '(\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
+                else:
+                    query += ', (\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
+                line_count += 1
+            if line_count > 1:
+                query += ';'
+                runQuery(query)
             else:
-                query += ', (\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
-            line_count += 1
-        if line_count > 1:
-            query += ';'
-            runQuery(query)
-        else:
-            logInfoMessage("No rates found in file")
+                logInfoMessage("No rates found in file")
 
     except Exception as e:
         logDebugMessage(str(e))
@@ -339,7 +349,7 @@ def initLogger():
 
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
 
 def getLogger():
