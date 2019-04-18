@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
 
   mysql-db:
@@ -6,14 +6,13 @@ services:
     image: mysql
     # ports used for development
     ports:
-      - 3306:3306
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: greengo
     volumes:
       - db_data:/var/lib/mysql
-      - ${DB_SCRIPT_PATH}:/db_scripts
       # this directory is used to automatically load all scripts found in there 
-      - ${DB_AUTO_RUN_SCRIPTS}:/docker-entrypoint-initdb.d
+      - ${GIT_HOME}/Weight/mysql/auto-run-scripts:/docker-entrypoint-initdb.d
     # all ports available via shared network
     networks:
       - shared
@@ -26,11 +25,12 @@ services:
     environment:
       DB_HOST: mysql-c
     build: 
-      context: ./app
+      context: ${GIT_HOME}/Weight/app
       dockerfile: Dockerfile  
     networks:
       - shared
     volumes:
+      - ${GIT_HOME}/Weight/app:/app
       - app_data:/in
     entrypoint: 
       - python3 
@@ -44,7 +44,7 @@ volumes:
       type: none
       o: bind
       # set based on your environment
-      device: "${APP_DATA_PATH}"
+      device: "${GIT_HOME}/Weight/app/in"
 
   db_data:
     driver: local
@@ -52,7 +52,7 @@ volumes:
       type: none
       o: bind
       # set based on your environment
-      device: "${DB_DATA_PATH}"
+      device: "${GIT_HOME}/Weight/mysql/datadir"
 
 networks:
   shared:

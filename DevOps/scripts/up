@@ -8,16 +8,24 @@ cd $WORKING_DIR
 echo "Working folder is $PWD"
 . ./env.ini
 
-echo "Port is $DEVOPS_PORT"
+rm -f $LOGS/*
 
-rm -r $LOGS
-mkdir $LOGS
+ONLY_DEVOPS=$2
 
+if [ "$ONLY_DEVOPS" -eq 1 ]; then
 devops_container_name=${DEVOPS_CONTAINER}'-app'
-echo "Devops container is $devops_container_name"
-docker-compose build up $devops_container_name 1> $LOGS/out.log 2>$LOGS/errors.log 
+   echo "Devops container is $devops_container_name"
+   docker-compose build --no-cache && 
+   docker-compose up $devops_container_name 1> $LOGS/out_do.log 2>$LOGS/errors_do.log & 
+else
+   w_container=${WEIGH_CONTAINER}'-app'
+   w_db_container=${WEIGH_CONTAINER}'-mysql-db' 
+   b_container=${PAYMENT_CONTAINER}'-app'
+   docker-compose build --no-cache $w_container $w_db_container  && 
+   docker-compose up $w_container $w_db_container  1> $LOGS/out.log 2>$LOGS/errors.log &
+#docker-compose build --no-cache && docker-compose --force-recreate up $w_container $w_db_container  1> $LOGS/out.log 2>$LOGS/errors.log
+fi
 
-#for all services
-#docker-compose up --build -d 1> $LOGS/out.log 2>$LOGS/errors.log 
+
 
 

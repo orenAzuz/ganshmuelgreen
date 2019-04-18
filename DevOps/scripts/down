@@ -1,8 +1,22 @@
 #!/bin/sh
 set -e
 
-echo "Working folder is $PWD. All containers are going down ..."
 . ./env.ini
 
-docker-compose stop && docker-compose rm -f
+ONLY_DEVOPS=$1
+echo "ONLY_DEVOPS is $ONLY_DEVOPS"
+if [ "$ONLY_DEVOPS" -eq 1 ]; then
+   devops_container_name=${DEVOPS_CONTAINER}'-app'
+   echo "The $devops_container_name container is going down ..."
+   docker-compose stop $devops_container_name && 
+   docker-compose rm -f $devops_container_name 
+else
+   w_container=${WEIGH_CONTAINER}'-app'
+   w_db_container=${WEIGH_CONTAINER}'-mysql-db' 
+   b_container=${PAYMENT_CONTAINER}'-app'
+   echo "The following containers are going down : $w_container, $w_db_container ..."
+   docker-compose stop $w_container $w_db_container && 
+   docker-compose rm -f $w_container $w_db_container 
+fi
+
 
