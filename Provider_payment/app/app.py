@@ -8,6 +8,7 @@ import http.client
 import json
 from flask import send_file
 import csv
+import logging
 
 app = Flask(__name__)
 
@@ -18,13 +19,20 @@ HOST = 'mysql-db'
 
 @app.route('/health')
 def health():
+	logInfoMessage("Received health check request")
+
     if checkDBConnection() == 1:
+		logInfoMessage("Health response OK")
         return "Payment team is OK"
+
+	logInfoMessage("Returned 'No Database Connection'")
+
     return "No Database Connection", 410
 
 
 @app.route('/provider/<name>', methods=['POST'])
 def createProvider(name):
+	logInfoMessage("Received request to create a provider: " + name)
     connection = getConnection()
     query = "INSERT INTO Provider (`name`) VALUES ('" + name + "');"
     try:
@@ -32,60 +40,106 @@ def createProvider(name):
             cursor.execute(query)
             providerID = cursor.lastrowid
         connection.commit()
+	except Exception as e:
+		logDebugMessage(str(e))
+		logErrorMessage("Failed to create provider: " + name)
+		return "Failed to create provider", 430
+	else:
+		logInfoMessage("Provider: " + name + " created")
+		return json.dumps({str(providerID): name})
     finally:
         connection.close()
-    return json.dumps({str(providerID): name})
 
 
 @app.route('/provider/<id>/<name>', methods=['PUT'])
 def updateProvider(id, name):
+	logInfoMessage("Received request to update provider: " + id + " with new name: " + name)
+
     query = "update Provider set name='" + name + "' where id=" + str(id) + ";"
-    print(query)
-    runQuery(query)
+	logDebugMessage("Run query: " + query)
+	if runQuery(query) == 0:
+		logErrorMessage("Failed to update provider")
+		return "Failed to update provider name", 430
+	else:
+		logInfoMessage("Provider name updated")
     return "Update provider name by id:" + str(id) + ". New name is: " + name
 
 
 @app.route('/rates', methods=['GET'])
 def rates():
-    return getRateFile()
+	logInfoMessage("Received request to download rates file")
+	try:
+		return send_file('/in/rates.csv', attachment_filename='rates.csv')
+	except Exception as e:
+		logErrorMessage(str(e))
+		return "File Not Found", 415
+	else:
+		logInfoMessage("File returned")
 
 
 @app.route('/rates', methods=['POST'])
 def getRates():
+	logInfoMessage("Received request to update rates")
     query = "DELETE FROM Rates;"
-    runQuery(query)
-    insertNewRates()
+	if runQuery(query) == 0:
+		logErrorMessage("Failed to delete old rates")
+		return "Failed to update rates", 430
+	else:
+		logDebugMessage("Rates table is cleaned")
+
+	if insertNewRates() == 0:
+		return "Failed to update new rates", 430
+
     return 'Rates Are Up To Date'
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['POST'])
 def createTruck(id, provider_id):
+	logInfoMessage("Received request to create new truck: " + id + " for provider: " + provider_id)
+
     query = "INSERT INTO Trucks (`id`, `provider_id`) VALUES ('" + id + "', " + provider_id + ");"
-    runQuery(query)
-    return "Create Truck: " + id + " for provider: " + provider_id
+
+	if runQuery(query) == 0:
+		logErrorMessage("Failed to create new truck")
+		return "Failed to create new truck", 430
+	else:
+		logInfoMessage("New truck created")
+
+	return "New truck crated"
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['PUT'])
 def updateTruck(id, provider_id):
+	logInfoMessage("Received request to update truck: " + id + " for provider: " + provider_id)
     query = "UPDATE Trucks SET provider_id=" + provider_id + " WHERE id='" + id + "';"
-    runQuery(query)
-    return "Update Truck provider by license: " + str(id) + " new provider id is: " + provider_id
+
+	if runQuery(query) == 0:
+		logErrorMessage("Failed to update truck")
+		return "Failed to update truck", 430
+	else:
+		logInfoMessage("Truck info updated")
+
+	return "Truck info updated"
 
 
 @app.route('/truck/<id>', methods=['GET'])
 def getTruck(id):
+	logInfoMessage("Received request to get info by truck id: " + id)
+
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
     try:
         weightUrl = "http://18.222.236.224/item/%s?from=%s&to=%s" % (str(id), str(t1), str(t2))
-        response = urllib.request.urlopen(weightUrl)
-        return response.read()
+    response = urllib.request.urlopen(weightUrl)
+    return response.read()
     except (urllib.HTTPError, urllib.URLError, http.client.HTTPException, Exception):
         return '{"id":1234, "tara":85000, "sessions":[10]}'
 
 
 @app.route('/bill/<providerId>', methods=['GET'])
 def bill(providerId):
+	logInfoMessage("Received request to get bill info by provider id: " + providerId)
+
     # Initialization
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
@@ -151,7 +205,7 @@ def bill(providerId):
                     for rateRow in rateRows:
                         if [[rateRow['scope'] == str(providerId)]]:
                             rate = rateRow['rate']
-                            print(rate)
+							logDebugMessage(rate)
                             break;
                         else:
                             rateAll = rateRow['rate']
@@ -193,21 +247,33 @@ def bill(providerId):
 # local functions
 
 def checkDBConnection():
+	logInfoMessage("Checking DB connection")
+
     try:
         # db = pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", auth_plugin_map="")
         db = getConnection()
-    except Exception:
-        print("Error in MySQL connection")
-        return 0
-    else:
-        print("Connection Good!")
+		if db is not None:
+			logInfoMessage("Connection established")
         db.close()
     return 1
+	except Exception:
+		logErrorMessage("Error in MySQL connection")
+
+	return 0
 
 
 def getConnection():
+	logDebugMessage("Getting DB connection")
+	
+	try:
     return pymysql.connect(host=HOST, port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
+	except Exception as e:
+		logDebugMessage(str(e))
+		logErrorMessage("Error in getting MySQL connection")
+		return None
+	else:
+		logDebugMessage("Got connection")    
 
 
 def runQuery(query):
@@ -219,16 +285,14 @@ def runQuery(query):
             cursor.execute(query)
 
         connection.commit()
+	except Exception as e:
+		logDebugMessage(str(e))
+		logErrorMessage("Failed to run query")
+		return 0
+	else:
+		return 1
     finally:
         connection.close()
-
-
-def getRateFile():
-    try:
-        return send_file('/in/rates.csv', attachment_filename='rates.csv')
-    except Exception as e:
-        print(str(e))
-        return "File Not Found", 415
 
 
 def insertNewRates():
@@ -237,30 +301,68 @@ def insertNewRates():
 
     query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
 
+	try:
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
 
         for row in csv_reader:
             if line_count == 0:
-                print('Column names are ' + ", ".join(row))
+					logDebugMessage('Column names are ' + ", ".join(row))
             elif line_count == 1:
                 query += '(\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
             else:
                 query += ', (\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
             line_count += 1
         if line_count > 1:
-            query += ';';
-            print('Query is: ' + query)
+				query += ';'
             runQuery(query)
+			else:
+				logInfoMessage("No rates found in file")
 
-    print('Processed ' + str(line_count - 1) + ' lines.')
+	except Exception as e:
+		logDebugMessage(str(e))
+		logErrorMessage("Failed to update new rates")
+		return 0
+	else:
+		logInfoMessage('Processed ' + str(line_count - 1) + ' lines.')
+		return 1
 
 
 def createJsonResponse():
     return ""
     pass
 
+
+def initLogger():
+	handler = logging.StreamHandler()
+	formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+
+	handler.setFormatter(formatter)
+	logger.addHandler(handler)
+	logger.setLevel(logging.INFO)
+
+
+def getLogger():
+	return logger
+
+
+def logDebugMessage(msg):
+	logger = getLogger()
+	logger.debug(msg)
+
+
+def logInfoMessage(msg):
+	logger = getLogger()
+	logger.info(msg)
+
+
+def logErrorMessage(msg):
+	logger = getLogger()
+	logger.error(msg)
+
+logger = logging.getLogger()
+initLogger()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
