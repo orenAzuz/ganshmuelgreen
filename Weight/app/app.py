@@ -318,7 +318,7 @@ def item(idarg):
 
         sessions = []
         for line in query_result:
-            if line[2] == "in" or line[2] == None:
+            if line[2] == "out" or line[2] == None:
                 sessions.append(line[0])
 
         data = {
