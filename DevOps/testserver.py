@@ -113,7 +113,7 @@ urlcmd = '/truck/123456'
 err = funcget()
 
 print('Provider Get Bill : ', end = '')
-urlcmd = '/bill/'+truckid
+urlcmd = '/bill/10001'
 err = funcget()
 
 
