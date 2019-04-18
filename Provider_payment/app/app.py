@@ -13,28 +13,28 @@ import logging
 app = Flask(__name__)
 
 # Consts
-#DBHOST = 'mysql-db'
+# DBHOST = 'mysql-db'
 DBHOST = '0.0.0.0'
-#HOST = '18.222.236.224'
-HOST='0.0.0.0'
+# HOST = '18.222.236.224'
+HOST = '0.0.0.0'
 
 
 @app.route('/health')
 def health():
-	logInfoMessage("Received health check request")
+    logInfoMessage("Received health check request")
 
     if checkDBConnection() == 1:
-		logInfoMessage("Health response OK")
+        logInfoMessage("Health response OK")
         return "Payment team is OK"
 
-	logInfoMessage("Returned 'No Database Connection'")
+    logInfoMessage("Returned 'No Database Connection'")
 
     return "No Database Connection", 410
 
 
 @app.route('/provider/<name>', methods=['POST'])
 def createProvider(name):
-	logInfoMessage("Received request to create a provider: " + name)
+    logInfoMessage("Received request to create a provider: " + name)
     connection = getConnection()
     query = "INSERT INTO Provider (`name`) VALUES ('" + name + "');"
     try:
@@ -42,91 +42,91 @@ def createProvider(name):
             cursor.execute(query)
             providerID = cursor.lastrowid
         connection.commit()
-	except Exception as e:
-		logDebugMessage(str(e))
-		logErrorMessage("Failed to create provider: " + name)
-		return "Failed to create provider", 430
-	else:
-		logInfoMessage("Provider: " + name + " created")
-		return json.dumps({str(providerID): name})
+    except Exception as e:
+        logDebugMessage(str(e))
+        logErrorMessage("Failed to create provider: " + name)
+        return "Failed to create provider", 430
+    else:
+        logInfoMessage("Provider: " + name + " created")
+        return json.dumps({str(providerID): name})
     finally:
         connection.close()
 
 
 @app.route('/provider/<id>/<name>', methods=['PUT'])
 def updateProvider(id, name):
-	logInfoMessage("Received request to update provider: " + id + " with new name: " + name)
+    logInfoMessage("Received request to update provider: " + id + " with new name: " + name)
 
     query = "update Provider set name='" + name + "' where id=" + str(id) + ";"
-	logDebugMessage("Run query: " + query)
-	if runQuery(query) == 0:
-		logErrorMessage("Failed to update provider")
-		return "Failed to update provider name", 430
-	else:
-		logInfoMessage("Provider name updated")
+    logDebugMessage("Run query: " + query)
+    if runQuery(query) == 0:
+        logErrorMessage("Failed to update provider")
+        return "Failed to update provider name", 430
+    else:
+        logInfoMessage("Provider name updated")
     return "Update provider name by id:" + str(id) + ". New name is: " + name
 
 
 @app.route('/rates', methods=['GET'])
 def rates():
-	logInfoMessage("Received request to download rates file")
-	try:
-		return send_file('/in/rates.csv', attachment_filename='rates.csv')
-	except Exception as e:
-		logErrorMessage(str(e))
-		return "File Not Found", 415
-	else:
-		logInfoMessage("File returned")
+    logInfoMessage("Received request to download rates file")
+    try:
+        return send_file('/in/rates.csv', attachment_filename='rates.csv')
+    except Exception as e:
+        logErrorMessage(str(e))
+        return "File Not Found", 415
+    else:
+        logInfoMessage("File returned")
 
 
 @app.route('/rates', methods=['POST'])
 def getRates():
-	logInfoMessage("Received request to update rates")
+    logInfoMessage("Received request to update rates")
     query = "DELETE FROM Rates;"
-	if runQuery(query) == 0:
-		logErrorMessage("Failed to delete old rates")
-		return "Failed to update rates", 430
-	else:
-		logDebugMessage("Rates table is cleaned")
+    if runQuery(query) == 0:
+        logErrorMessage("Failed to delete old rates")
+        return "Failed to update rates", 430
+    else:
+        logDebugMessage("Rates table is cleaned")
 
-	if insertNewRates() == 0:
-		return "Failed to update new rates", 430
+    if insertNewRates() == 0:
+        return "Failed to update new rates", 430
 
     return 'Rates Are Up To Date'
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['POST'])
 def createTruck(id, provider_id):
-	logInfoMessage("Received request to create new truck: " + id + " for provider: " + provider_id)
+    logInfoMessage("Received request to create new truck: " + id + " for provider: " + provider_id)
 
     query = "INSERT INTO Trucks (`id`, `provider_id`) VALUES ('" + id + "', " + provider_id + ");"
 
-	if runQuery(query) == 0:
-		logErrorMessage("Failed to create new truck")
-		return "Failed to create new truck", 430
-	else:
-		logInfoMessage("New truck created")
+    if runQuery(query) == 0:
+        logErrorMessage("Failed to create new truck")
+        return "Failed to create new truck", 430
+    else:
+        logInfoMessage("New truck created")
 
-	return "New truck crated"
+    return "New truck crated"
 
 
 @app.route('/truck/<id>/<provider_id>', methods=['PUT'])
 def updateTruck(id, provider_id):
-	logInfoMessage("Received request to update truck: " + id + " for provider: " + provider_id)
+    logInfoMessage("Received request to update truck: " + id + " for provider: " + provider_id)
     query = "UPDATE Trucks SET provider_id=" + provider_id + " WHERE id='" + id + "';"
 
-	if runQuery(query) == 0:
-		logErrorMessage("Failed to update truck")
-		return "Failed to update truck", 430
-	else:
-		logInfoMessage("Truck info updated")
+    if runQuery(query) == 0:
+        logErrorMessage("Failed to update truck")
+        return "Failed to update truck", 430
+    else:
+        logInfoMessage("Truck info updated")
 
-	return "Truck info updated"
+    return "Truck info updated"
 
 
 @app.route('/truck/<id>', methods=['GET'])
 def getTruck(id):
-	logInfoMessage("Received request to get info by truck id: " + id)
+    logInfoMessage("Received request to get info by truck id: " + id)
 
     t1 = flask.request.args.get("from")
     t2 = flask.request.args.get("to")
@@ -140,7 +140,7 @@ def getTruck(id):
 
 @app.route('/bill/<providerId>', methods=['GET'])
 def bill(providerId):
-	logInfoMessage("Received request to get bill info by provider id: " + providerId)
+    logInfoMessage("Received request to get bill info by provider id: " + providerId)
 
     # Initialization
     t1 = flask.request.args.get("from")
@@ -160,74 +160,72 @@ def bill(providerId):
             cursor.execute(query, (str(providerId)), )
             result = cursor.fetchone()
             if result is not None:
-            providerName = result['name']
-
-            # Get provider trucks
-            query = "SELECT id FROM Trucks WHERE provider_id=%s;"
-            cursor.execute(query, (str(providerId)), )
-            truckRows = cursor.fetchall()
-            for truckRow in truckRows:
-                truckCount += 1  # count trucks
-                truck = truckRow['id']
-                    truckStr = getTruck(truck)
-                    #truckStr = '{"id":10000, "tara":1200, "sessions":[11]}'  # Get truck data from API
-                truckData = json.loads(truckStr)  # Convert to json object
-                    print(truckData)
-                sessions = truckData['sessions']
-                sessionCount += len(sessions)  # accumulate sessions
-                for sessionId in sessions:
+                providerName = result['name']
+                # Get provider trucks
+                query = "SELECT id FROM Trucks WHERE provider_id=%s;"
+                cursor.execute(query, (str(providerId)), )
+                truckRows = cursor.fetchall()
+                for truckRow in truckRows:
+                    truckCount += 1  # count trucks
+                    truckStr = getTruck(truckRow['id'])
+                    truckData = json.loads(truckStr)  # Convert to json object
+                    sessions = truckData['sessions']
+                    sessionCount += len(sessions)  # accumulate sessions
+                    for sessionId in sessions:
                         sessionUrl = "http://%s:8081/session/%s" % (HOST, str(sessionId))
                         response = urllib.request.urlopen(sessionUrl)
                         sessionStr = response.read()
-                    sessionData = json.loads(sessionStr)  # Convert to json object
+                        sessionData = json.loads(sessionStr)  # Convert to json object
 
-                    # Initialize produce in products table
-                    if products.get(sessionData['produce']) is None:
-                        products[sessionData['produce']] = {}
+                        # Initialize produce in products table
+                        if products.get(sessionData['produce']) is None:
+                            products[sessionData['produce']] = {}
 
-                    # Set product name
-                    products[sessionData['produce']]['produce'] = sessionData['produce']
+                        # Set product name
+                        products[sessionData['produce']]['produce'] = sessionData['produce']
 
-                    # Set accumulation of product sessions count
-                    if products[sessionData['produce']].get('count'):
-                        products[sessionData['produce']]['count'] += 1
-                    else:
-                        products[sessionData['produce']]['count'] = 1
-
-                    # Set accumulation of product neto tara amount
-                        if sessionData.get('neto'):
-                    if products[sessionData['produce']].get('amount'):
-                        products[sessionData['produce']]['amount'] += sessionData['neto']
-                    else:
-                        products[sessionData['produce']]['amount'] = sessionData['neto']
-
-                    # Get provider rate
-                    query = "select rate,scope from Rates where scope in ('All',%s) and product_id=%s;"
-                    cursor.execute(query, (str(providerId), sessionData['produce']), )
-                    rateRows = cursor.fetchall()
-                    rate, rateAll = 0, 0
-                    for rateRow in rateRows:
-                        if [[rateRow['scope'] == str(providerId)]]:
-                            rate = rateRow['rate']
-							logDebugMessage(rate)
-                            break;
+                        # Set accumulation of product sessions count
+                        if products[sessionData['produce']].get('count'):
+                            products[sessionData['produce']]['count'] += 1
                         else:
-                            rateAll = rateRow['rate']
-                    if not rate:
-                        rate = rateAll
-                    products[sessionData['produce']]['rate'] = rate
+                            products[sessionData['produce']]['count'] = 1
 
-                    # Calc pay from rate and amount and accumulate product pay
-                    if products[sessionData['produce']].get('pay'):
-                        products[sessionData['produce']]['pay'] += products[sessionData['produce']]['amount'] * \
-                                                                   products[sessionData['produce']]['rate']
-                    else:
-                        products[sessionData['produce']]['pay'] = products[sessionData['produce']]['amount'] * \
-                                                                  products[sessionData['produce']]['rate']
+                        # Set accumulation of product neto tara amount
+                        if sessionData.get('neto'):
+                            if products[sessionData['produce']].get('amount'):
+                                products[sessionData['produce']]['amount'] += sessionData['neto']
+                            else:
+                                products[sessionData['produce']]['amount'] = sessionData['neto']
 
-                    totalPay += products[sessionData['produce']]['pay']  # Accumulate all pays for all products
+                            # Get provider rate
+                            query = "select rate,scope from Rates where scope in ('All',%s) and product_id=%s;"
+                            cursor.execute(query, (str(providerId), sessionData['produce']), )
+                            rateRows = cursor.fetchall()
+                            rate, rateAll = 0, 0
+                            for rateRow in rateRows:
+                                if [[rateRow['scope'] == str(providerId)]]:
+                                    rate = rateRow['rate']
+                                    logDebugMessage(rate)
+                                    break;
+                                else:
+                                    rateAll = rateRow['rate']
+                            if not rate:
+                                rate = rateAll
+                            products[sessionData['produce']]['rate'] = rate
+
+                            # Calc pay from rate and amount and accumulate product pay
+                            if products[sessionData['produce']].get('pay'):
+                                products[sessionData['produce']]['pay'] += products[sessionData['produce']]['amount'] * \
+                                                                           products[sessionData['produce']]['rate']
+                            else:
+                                products[sessionData['produce']]['pay'] = products[sessionData['produce']]['amount'] * \
+                                                                          products[sessionData['produce']]['rate']
+
+                            totalPay += products[sessionData['produce']]['pay']  # Accumulate all pays for all products
+                        else:
+                            logErrorMessage("Session has no neto to use")
             else:
-                return "Provider hasn't been found"
+                logErrorMessage("Provider hasn't been found")
                 connection.commit()
                 connection.close()
 
@@ -255,33 +253,32 @@ def bill(providerId):
 # local functions
 
 def checkDBConnection():
-	logInfoMessage("Checking DB connection")
+    logInfoMessage("Checking DB connection")
 
     try:
-        # db = pymysql.connect(host="mysql-db", port=3306, user="root", passwd="greengo", db="billdb", auth_plugin_map="")
         db = getConnection()
-		if db is not None:
-			logInfoMessage("Connection established")
+        if db is not None:
+            logInfoMessage("Connection established")
         db.close()
-    return 1
-	except Exception:
-		logErrorMessage("Error in MySQL connection")
+        return 1
+    except Exception:
+        logErrorMessage("Error in MySQL connection")
 
-	return 0
+    return 0
 
 
 def getConnection():
-	logDebugMessage("Getting DB connection")
-	
-	try:
-    return pymysql.connect(host=DBHOST, port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
-                           cursorclass=pymysql.cursors.DictCursor)
-	except Exception as e:
-		logDebugMessage(str(e))
-		logErrorMessage("Error in getting MySQL connection")
-		return None
-	else:
-		logDebugMessage("Got connection")    
+    logDebugMessage("Getting DB connection")
+
+    try:
+        return pymysql.connect(host=DBHOST, port=3306, user="root", passwd="greengo", db="billdb", charset='utf8mb4',
+                               cursorclass=pymysql.cursors.DictCursor)
+    except Exception as e:
+        logDebugMessage(str(e))
+        logErrorMessage("Error in getting MySQL connection")
+        return None
+    else:
+        logDebugMessage("Got connection")
 
 
 def runQuery(query):
@@ -293,81 +290,77 @@ def runQuery(query):
             cursor.execute(query)
 
         connection.commit()
-	except Exception as e:
-		logDebugMessage(str(e))
-		logErrorMessage("Failed to run query")
-		return 0
-	else:
-		return 1
+    except Exception as e:
+        logDebugMessage(str(e))
+        logErrorMessage("Failed to run query")
+        return 0
+    else:
+        return 1
     finally:
         connection.close()
 
 
 def insertNewRates():
     filename = "/in/rates.csv"
-    # filename = "rates.csv"
 
     query = "INSERT INTO Rates (`product_id`, `rate`, `scope`) VALUES "
 
-	try:
-    with open(filename) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
+    try:
+        with open(filename) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            line_count = 0
 
         for row in csv_reader:
             if line_count == 0:
-					logDebugMessage('Column names are ' + ", ".join(row))
+                logDebugMessage('Column names are ' + ", ".join(row))
             elif line_count == 1:
                 query += '(\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
             else:
                 query += ', (\'' + row[0] + '\',' + row[1] + ',\'' + row[2] + '\')'
             line_count += 1
         if line_count > 1:
-				query += ';'
+            query += ';'
             runQuery(query)
-			else:
-				logInfoMessage("No rates found in file")
+        else:
+            logInfoMessage("No rates found in file")
 
-	except Exception as e:
-		logDebugMessage(str(e))
-		logErrorMessage("Failed to update new rates")
-		return 0
-	else:
-		logInfoMessage('Processed ' + str(line_count - 1) + ' lines.')
-		return 1
-
-
-def createJsonResponse():
-    return ""
-    pass
+    except Exception as e:
+        logDebugMessage(str(e))
+        logErrorMessage("Failed to update new rates")
+        return 0
+    else:
+        logInfoMessage('Processed ' + str(line_count - 1) + ' lines.')
+        return 1
 
 
 def initLogger():
-	handler = logging.StreamHandler()
-	formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 
-	handler.setFormatter(formatter)
-	logger.addHandler(handler)
-	logger.setLevel(logging.INFO)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
 
 def getLogger():
-	return logger
+    return logger
 
 
+#
 def logDebugMessage(msg):
-	logger = getLogger()
-	logger.debug(msg)
+    logger = getLogger()
+    logger.debug(msg)
 
 
 def logInfoMessage(msg):
-	logger = getLogger()
-	logger.info(msg)
+    logger = getLogger()
+    logger.info(msg)
 
 
 def logErrorMessage(msg):
-	logger = getLogger()
-	logger.error(msg)
+    logger = getLogger()
+    logger.error(msg)
+
 
 logger = logging.getLogger()
 initLogger()
