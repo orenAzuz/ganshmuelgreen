@@ -6,6 +6,7 @@ import requests
 import subprocess
 import datetime
 import json
+import time
 #PORT = 8000
 
 from flask_mail import Mail, Message
@@ -40,6 +41,7 @@ def api_health():
 @app.route("/reload",methods=['POST'])
 def api_reload():
     subprocess.call(['./reload.sh'])
+    time.sleep(200)
     data = json.loads(json.dumps(request.get_json()))
     commits = data["commits"]
     id = commits[0]
@@ -47,8 +49,7 @@ def api_reload():
     name = committer["name"]
     email = committer["email"]
     mestxt = "New deploy from git. branch -> master. "
-    send_mail(mestxt,name ,email)
-    return render_template('index.html',message=mestxt)
+    return send_mail(mestxt,name ,email)
 
 
 def send_mail(message, name ,email):
@@ -64,7 +65,7 @@ def send_mail(message, name ,email):
     msg = Message(message, sender='webmykitchen@gmail.com', recipients=get_mail_list())
     msg.body = body_txt
     mail.send(msg)
-    return 'done'
+    return render_template('index.html',message=mestxt)
 
 
 def get_mail_list():
@@ -81,13 +82,32 @@ def get_mail_list():
 
 
 def http_request(port):
-    url = "http://green.develeap.com:%s/health" % port
+    url = "http://18.222.236.224:%s/health" % port
     try:
         r = requests.get(url)
         return r.status_code
     except requests.exceptions.RequestException:
         return 111
 
+
+@app.route("/test")
+def test():
+    url = "http://18.222.236.224:8081/health"
+
+    return post_weight()
+
+
+def post_weight():
+
+    data = [("direction","in"),("truck","A10202"), ("force","true"), ("containers","C-35434,K-8263,K-7943"),
+            ("weight","2000"),("unit","kg"),("produce","oranges")]
+    print(data)
+    res = requests.post('http://18.222.236.224:8081/weight', data=data)
+    return str(res.text)
+
+
+def get_weight():  
+    return
 
 if __name__ == "__main__":
 #	app.run(port=PORT, host = HOST, debug=True)
