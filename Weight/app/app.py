@@ -15,6 +15,7 @@ import datetime
 
 app = Flask(__name__)
 
+logging.basicConfig(filename='Weight_Log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
 
 def connect_or_reconnect_db(mydb):
     # Initially DB is disconnected, but we want to retain one connection & only reconnect when necessary since
@@ -27,6 +28,7 @@ def connect_or_reconnect_db(mydb):
             database="weight",
             auth_plugin='mysql_native_password'
         )
+    logging.debug('mySQL connection created successfully, mydb:'+str(mydb))
     return mydb
 
 def run_select(mydb, sql):
@@ -35,6 +37,7 @@ def run_select(mydb, sql):
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
+    logging.debug('run_select successfully finished, results:'+ str(results))
     return results
 
 
@@ -48,6 +51,7 @@ def run_select_json(mydb, sql):
     json_data = []
     for result in results:
         json_data.append(dict(zip(row_headers, result)))
+    logging.debug('run_select_json successfully finished, json_data:'+json_data)
     return json.dumps(json_data)
 
 
@@ -58,8 +62,10 @@ def run_select_one_value(mydb, sql):
     sql_cursor.execute(sql)
     results = sql_cursor.fetchall()
     if len(results) > 0:
+        logging.debug('run_select_json successfully finished,results[0][0]:'+str(results[0][0]))
         return results[0][0]
     else:
+        logging.debug('run_select_json successfully finished,"":')
         return ""
 
 
@@ -69,7 +75,7 @@ def run_insert(mydb, sql):
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     mydb.commit()
-    print("Record inserted successfully")
+    logging.debug("Record inserted successfully")
 
 
 def run_update(mydb, sql):
@@ -78,7 +84,7 @@ def run_update(mydb, sql):
     sql_cursor = mydb.cursor()
     sql_cursor.execute(sql)
     mydb.commit()
-    print("Record updated successfully")
+    logging.debug("Record updated successfully")
 
 
 def weight_json_in_or_none(mydb, session_id):
@@ -92,6 +98,7 @@ def weight_json_in_or_none(mydb, session_id):
         print("Getting session values (not for 'in' or 'none' session type)")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
     else:
+        logging.error(str(last_insert_id)+" was not found in table 'transactions'")
         return "Session ID not found (404)", 404
 
     json_data = []
@@ -100,7 +107,7 @@ def weight_json_in_or_none(mydb, session_id):
         # "truck": <license> or "na",
         # "neto": <int> or "na" // na if some of containers have unknown tara
         json_data.append(dict(zip(row_headers, result)))
-
+    logging.debug("Found id in 'transactions': "+str(json.dumps(json_data)[1:][:-1]))
     return json.dumps(json_data)[1:][:-1] # strip first and last character
 
 
@@ -113,9 +120,10 @@ def weight_json_out(mydb, session_id):
                        str(session_id) + " AND direction = 'out'")
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
-        print("Getting session values (not for 'out' session type)")
+        logging.debug("Getting session values (not for 'out' session type)")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
     else:
+        logging.error(str(truck_previous_session_id)+" was not found in table 'transactions'")
         return "Session ID not found (404)", 404
 
     json_data = []
@@ -124,7 +132,7 @@ def weight_json_out(mydb, session_id):
         # "truck": <license> or "na",
         # "neto": <int> or "na" // na if some of containers have unknown tara
         json_data.append(dict(zip(row_headers, result)))
-
+    logging.debug("Found id in 'transactions': "+str(json.dumps(json_data)[1:][:-1]))
     return json.dumps(json_data)[1:][:-1] # strip first and last character
 
 
@@ -139,6 +147,7 @@ def index():
     /item/&lt;id&gt; <br>
     /session/&lt;id&gt; <br>
     '''
+    logging.debug("Showing index")
     return services
 
 @app.route('/health')
@@ -154,67 +163,76 @@ def health():
         sqlcursor = mydb.cursor()
         sqlcursor.execute("SELECT 1;")
         mydb.close()
+        logging.debug("Status check: OK 200")
         return 'OK', 200
     except:
+        logging.fatal("No server connection: Failure 500")
         return 'Failure', 500
 
 
-@app.route('/batch-weight/<file>')
+@app.route('/batch-weight/<file>', methods = ['POST'])
 def batch_weight(file):
+    if request.method == 'POST':
 
-    results="Field added:<br>"
+        results="Field added:<br>"
 
-    mydb = mysql.connector.connect(
-      host=os.environ['DB_HOST'],
-      user="root",
-      passwd="greengo",
-      database="weight",
-      auth_plugin='mysql_native_password'
-    )
+        mydb = mysql.connector.connect(
+          host=os.environ['DB_HOST'],
+          user="root",
+          passwd="greengo",
+          database="weight",
+          auth_plugin='mysql_native_password'
+        )
 
-    sqlcursor = mydb.cursor()
+        sqlcursor = mydb.cursor()
 
-    if file in os.listdir("in/"):
-        if file.lower().endswith(('.csv')):
-            new_batch = open("in/"+file)
-            lines = new_batch.readlines()
-            unit = lines[0][:-1].split(',')[1]
-            if unit[0] == '"' and unit[-1] == '"':
-                unit = unit[1:-1]
-            for line in lines[1:]:
-                container_id = line.split(',')[0]
-                weight = line.split(',')[1]
+        if file in os.listdir("in/"):
+            if file.lower().endswith(('.csv')):
+                new_batch = open("in/"+file)
+                lines = new_batch.readlines()
+                unit = lines[0][:-1].split(',')[1]
+                if unit[0] == '"' and unit[-1] == '"':
+                    unit = unit[1:-1]
+                for line in lines[1:]:
+                    container_id = line.split(',')[0]
+                    weight = line.split(',')[1]
 
-                try:
-                    # insert to table containers_registered id, weight and unit
-                    sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
-                    mydb.commit()
-                    results+= container_id + " " + weight + " " + unit + "<br>"
-                except mysql.connector.IntegrityError:
-                    pass
-
-
-        elif file.lower().endswith(('.json')):
-            new_batch = open("in/"+file)
-            lines = json.load(new_batch)
-            for line in lines:
-                container_id = line["id"]
-                weight = line["weight"]
-                unit = line["unit"]
-
-                try:
-                    # insert to table containers_registered id, weight and unit
-                    sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
-                    mydb.commit()
-                    results+= container_id + " " + str(weight) + " " + unit + "<br>"
-                except mysql.connector.IntegrityError:
-                    pass 
+                    try:
+                        logging.debug("insert to table containers_registered id, weight and unit")
+                        sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                        mydb.commit()
+                        results+= container_id + " " + weight + " " + unit + "<br>"
+                    except mysql.connector.IntegrityError:
+                        logging.error("mysql connector IntegrityError error")
+                        pass
 
 
-        new_batch.close()
+            elif file.lower().endswith(('.json')):
+                new_batch = open("in/"+file)
+                lines = json.load(new_batch)
+                for line in lines:
+                    container_id = line["id"]
+                    weight = line["weight"]
+                    unit = line["unit"]
 
-    mydb.close()
-    return results
+                    try:
+                        logging.debug("insert to table containers_registered id, weight and unit")
+                        sqlcursor.execute("INSERT INTO containers_registered (container_id,weight,unit) VALUES (%s,%s,%s)", (container_id,weight,unit))
+                        mydb.commit()
+                        results+= container_id + " " + str(weight) + " " + unit + "<br>"
+                    except mysql.connector.IntegrityError:
+                        logging.error("mysql connector IntegrityError error")
+                        pass 
+
+
+            new_batch.close()
+
+        else:
+            results = f"No {file} file found"
+
+        mydb.close()
+        logging.debug("Returning file containing: "+str(results))
+        return results
 
 @app.route('/unknown')
 def unknown():
@@ -230,6 +248,7 @@ def unknown():
     result = mycursor.fetchall()
     ret = ""
     ret = '\n'.join(map(str, result))
+    logging.debug("Returning UNKNOWN weight: "+ret)
     if ret=="":
         return "There is none UNKNOWN weight"
     else:
@@ -283,7 +302,7 @@ def item(idarg):
 
                 for container in container_list:
                     if idarg == container:
-                        if line[2] == "in" or line[2] == None:
+                        if line[2] == "out" or line[2] == None:
                             sessions.append(line[0])
                             there_is_container = True
 
@@ -312,8 +331,9 @@ def item(idarg):
         # result = line[3]
 
     else:
+        logging.error("Not found correct setion for id: "+str(idarg))
         result = "Session ID not found (404)", 404
-
+    logging.debug("Returning final result: "+str(result))
     return result
 
 
@@ -333,22 +353,23 @@ def session(id):
                       id + " AND direction = 'out'")
     results = sql_cursor.fetchall()
     if sql_cursor.rowcount > 0:
-        print("Getting session values for 'out' session type")
+        logging.debug("Getting session values for 'out' session type")
         row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
 
     else:
         sql_cursor.execute("SELECT id, truck, bruto, produce FROM transactions WHERE id = " + id)
         results = sql_cursor.fetchall()
         if sql_cursor.rowcount > 0:
-            print("Getting session values (for 'in' or 'none' session type)")
+            logging.debug("Getting session values (for 'in' or 'none' session type)")
             row_headers = [val[0] for val in sql_cursor.description]  # this will extract row headers
         else:
-            return "Session ID not found (404)", 404
+            logging.error("Session ID not found: 404")
+            return "Session ID not found", 404
 
     json_data = []
     for result in results:
         json_data.append(dict(zip(row_headers, result)))
-
+    logging.debug("Returning json file: "+str(json.dumps(json_data)[1:][:-1]))
     return json.dumps(json_data)[1:][:-1] # strip first and last character
 
 
@@ -369,8 +390,13 @@ def weight():
         t2 = request.args.get('to', default=tim)
         f = request.args.get('filter', default="'in','out','none'")
         mycursor = mydb.cursor()
-        arg = mycursor.execute(
+
+        if f=='in' or f=='out':
+            arg = mycursor.execute(
             "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN ('" + f + "') AND datetime BETWEEN " + t1 + " AND " + t2)
+        else: 
+            arg = mycursor.execute(
+            "SELECT id,direction,bruto,neto,produce,containers FROM transactions WHERE direction IN (" + f + ") AND datetime BETWEEN " + t1 + " AND " + t2)
         result = mycursor.fetchall()
         json_data = []
         row_headers = [val[0] for val in mycursor.description]
@@ -379,6 +405,7 @@ def weight():
             content = {'id': x[0], 'direction': x[1], 'bruto': x[2], 'neto': x[3], 'produce': x[4], 'containers': x[5]}
             json_data.append(content)
             content = {}
+        logging.debug("Returning json file: "+str(json.dumps(json_data)))
         return json.dumps(json_data)
 
 
@@ -418,19 +445,27 @@ def weight():
             if len(in_or_out) > 0 and in_or_out[0][1] == 'in':
                 # in after none
                 print("'none' after 'in' not allowed (400)")
+                logging.error("'none' after 'in' not allowed: 400")
                 return "'none' after 'in' not allowed (400)", 400
             else:
                 print("'none' - normal")
                 run_insert(mydb, "INSERT INTO transactions (datetime, direction, containers, bruto, produce) VALUES (now(), " \
                            "'" + direction + "', '" + containers + "', " + str(weight_kg) + ", '" + produce + "' )")
+                logging.debug("Returning weight infornation: "+str(weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))))
                 return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
         if direction == 'in':
             if not truck:
                 return "Required 'truck' value not supplied (400)", 400
 
-            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions " + #WHERE truck = '"+truck+"' " \
+            in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
+
+            if len(in_or_out) == 0:
+                # No previous record for this truck, insert
+                run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
+                           "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
+                return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
             if in_or_out[0][1] == 'in':
                 # in after in
@@ -441,17 +476,18 @@ def weight():
                     run_update(mydb, "UPDATE transactions SET bruto = "+str(weight_kg)+" "
                                "WHERE id = "+str(truck_previous_session_id))
                     # return info - only for in
+                    logging.debug("changing value")
                     return weight_json_in_or_none(mydb, truck_previous_session_id)
                 elif in_or_out[0][1] == 'none':
-                    print("'in' after 'none' not allowed (400)")
+                    logging.error("'in' after 'none' not allowed (400)")
                     return "'in' after 'none' not allowed (400)", 400
                 else:
-                    print("'in' after 'in' without force not allowed (400)")
+                    logging.error("'in' after 'in' without force not allowed (400)")
                     return "'in' after 'in' without force not allowed (400)", 400
 
             elif in_or_out[0][1] == 'out':
                 # in after out
-                print("in after out")
+                logging.debug("in after out")
                 # normal new session
                 run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
                              "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
@@ -465,10 +501,11 @@ def weight():
                 run_insert(mydb, "INSERT INTO transactions (datetime, direction, truck, containers, bruto, produce) VALUES (now(), " \
                              "'"+direction+"', '"+truck+"', '"+containers+"', "+str(weight_kg)+", '"+produce+"' )")
                 # return info - only for in
+                logging.debug("changing value")
                 return weight_json_in_or_none(mydb, run_select_one_value(mydb, "SELECT LAST_INSERT_ID()"))
 
             else:
-                print("Operation unknown - not allowed (400)")
+                logging.error("Operation unknown - not allowed (400)")
                 return "Operation unknown - not allowed (400)", 400
 
 
@@ -478,6 +515,11 @@ def weight():
 
             in_or_out = run_select(mydb, "SELECT id, direction FROM transactions WHERE truck = '"+truck+"' " \
                                    "ORDER BY datetime DESC LIMIT 1")
+
+            if len(in_or_out) == 0:
+                logging.error("'out' for truck that has no previous 'in' - not allowed (400)")
+                return "'out' for truck that has no previous 'in' - not allowed (400)", 400
+
 
             if in_or_out[0][1] == 'in' or (in_or_out[0][1] == 'out' and force == 'true'):
                 # this implies 'in' then 'out' ...
@@ -501,21 +543,23 @@ def weight():
                     run_update(mydb, "UPDATE transactions SET direction = 'out', truckTara = "+str(weight_kg)+
                                ", neto = "+str(bruto_was-weight_kg-total_weight_of_containers)+" WHERE id = "+str(truck_previous_session_id))
                     # return info - only for in
+                    logging.debug("returning value: "+weight_json_out(mydb, truck_previous_session_id))
                     return weight_json_out(mydb, truck_previous_session_id)
                 else:
                     # some container weights unknown - don't update 'neto'
                     run_update(mydb, "UPDATE transactions SET direction = 'out', truckTara = "+str(weight_kg)+" "
                                "WHERE id = "+str(truck_previous_session_id))
                     # return info - only for in
+                    logging.debug("returning value: "+weight_json_out(mydb, truck_previous_session_id))
                     return weight_json_out(mydb, truck_previous_session_id)
 
             elif in_or_out[0][1] == 'out' and force != 'true':
                 # out after out ... not forced
-                print("'out' after 'out' without force not allowed (400)")
+                logging.error("'out' after 'out' without force not allowed (400)")
                 return "'out' after 'out' without force not allowed (400)", 400
 
             else:
-                print("'out' without 'in' not allowed (400)")
+                logging.error("'out' without 'in' not allowed (400)")
                 return "'out' without 'in' not allowed (400)", 400
 
 
