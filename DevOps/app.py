@@ -7,6 +7,9 @@ import subprocess
 import datetime
 import json
 import time
+import os
+
+
 #PORT = 8000
 
 from flask_mail import Mail, Message
@@ -93,7 +96,7 @@ def http_request(port):
 @app.route("/test")
 def test():
     url = "http://18.222.236.224:8081/health"
-
+    os.system('python3 testserver.py')
     return post_weight()
 
 
